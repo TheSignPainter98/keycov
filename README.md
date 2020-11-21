@@ -1,4 +1,4 @@
-# keycov
+# KeyCov
 
 Kitting is hard.
 Making sure that your kitting makes sense requires three things:
