@@ -1,3 +1,4 @@
 tags
 types_*.taghl
 __pycache__/
+*.ignored
