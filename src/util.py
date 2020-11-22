@@ -12,3 +12,6 @@ def iconcat(a:list, b:list) -> list:
 
 def repeat(val:object, n:int) -> [object]:
     return [ val for _ in range(n) ]
+
+def restrict_dict(d:dict, ks:[object]) -> dict:
+    return { k:v for k,v in d.items() if k in ks }

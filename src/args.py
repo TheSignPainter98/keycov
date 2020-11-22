@@ -1,7 +1,11 @@
 # Copyright (C) Edward Jones
 
+from .coverage_data import analyses
+from .util import repeat, restrict_dict
 from argparse import ArgumentParser, Namespace
 from functools import reduce
+from os import linesep
+from texttable import Texttable as TextTable
 from sys import exit, stderr
 
 description:str = 'A little script for helping keycap designers analyse kitting coverage'
@@ -11,10 +15,19 @@ args:[dict] = [
         'dest': 'show_help',
         'short': '-h',
         'long': '--help',
-        'action': 'help',
-        'help': 'Show this help message and exit',
+        'action': 'store_true',
+        'help': 'Show short help message and exit',
         'type': bool,
         'default': False
+    },
+    {
+        'dest': 'show_long_help',
+        'short': '-H',
+        'long': '--long-help',
+        'action': 'store_true',
+        'type': bool,
+        'default': False,
+        'help': 'Show the longer help message and exit'
     },
     {
         'dest': 'input_dir',
@@ -86,15 +99,18 @@ def parse_args(iargs: tuple) -> Namespace:
     if checkResult is not None:
         ap.print_usage()
         print(checkResult, file=stderr)
-        exit(1)
+        exit(-1)
 
     npargs:Namespace = Namespace(**rargs)
     if npargs.show_help:
         ap.print_help()
-        raise AdjustKeysGracefulExit()
+        exit(0)
+    elif npargs.show_long_help:
+        ap.print_help()
+        print(get_long_help())
+        exit(0)
 
     return npargs
-
 
 def check_args(args: dict) -> 'Maybe str':
     items: [[str, object]] = args.items()
@@ -109,6 +125,14 @@ def arg_inf(arg:dict) -> str:
     if 'default' in arg:
         return ' (default: %s%s)' % (arg['default'], ' ' + arg['arg_inf_msg'] if 'arg_inf_msg' in arg else '')
     return ''
+
+def get_long_help() -> str:
+    table:TextTable = TextTable()
+    table.set_deco(0)
+    table.set_header_align(repeat('l', 2))
+    table.add_rows(list(map(lambda a: [a['pretty-name'], a['description']], analyses)), header=False)
+
+    return linesep + 'analyses to be performed:' + linesep + table.draw()
 
 def dict_union_ignore_none(a: dict, b: dict) -> dict:
     return dict(a, **dict(filter(lambda p: p[1] is not None, b.items())))

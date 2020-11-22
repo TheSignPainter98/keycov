@@ -16,8 +16,8 @@ def main(args:[str]) -> int:
     # Collect input data
     input_layout_files:[str] = get_json_and_yaml_files(pargs.input_dir)
     target_layout_files:[str] = get_json_and_yaml_files(pargs.target_dir)
-    input_layouts:[Tuple[str, List[dict]]] = list(map(parse_named_kle, input_layout_files))
-    target_layouts:[Tuple[str, List[dict]]] = list(map(parse_named_kle, target_layout_files))
+    input_layouts:[[dict]] = list(map(parse_named_kle, input_layout_files))
+    target_layouts:[[dict]] = list(map(parse_named_kle, target_layout_files))
 
     # Analyse coverage
     coverage_data:[[dict]] = compute_coverage_data(target_layouts, input_layouts)
