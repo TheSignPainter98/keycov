@@ -9,3 +9,6 @@ def flatten(obj:object) -> [object]:
 def iconcat(a:list, b:list) -> list:
     a.extend(b)
     return a
+
+def repeat(val:object, n:int) -> [object]:
+    return [ val for _ in range(n) ]

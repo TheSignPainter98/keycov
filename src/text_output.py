@@ -1,6 +1,11 @@
+from .util import repeat
+from os import linesep
 from texttable import Texttable as TextTable
 
-def make_table(table_data:[dict], sort_key:str=None) -> str:
+def output_as_text(coverage_data:[[dict]]) -> str:
+    return (linesep * 2).join(list(map(make_table, coverage_data)))
+
+def make_table(table_data:[dict]) -> str:
     if table_data == []:
         return ''
 
@@ -20,7 +25,7 @@ def make_table(table_data:[dict], sort_key:str=None) -> str:
     table.header(col_names)
 
     # Add table body content
-    body:[[object]] = list(map(lambda r: list(map(lambda f: f[1], r)), sorted(map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data), key=sort_key)))
+    body:[[object]] = list(map(lambda r: list(map(lambda f: f[1], r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data)))
     table.add_rows(body, header=False)
 
     return table.draw()
@@ -30,10 +35,7 @@ def _format_field(val:object) -> str:
         int: str,
         float: lambda f: '%.2f' % f,
         str: lambda s: s,
-        bool: bool,
-        list: lambda l: ', '.join(list(map(_format_field,l)))
+        bool: lambda b: '✓' if b else '✗',
+        list: lambda l: ', '.join(list(map(_format_field, l)))
     }
     return convs[type(val)](val)
-
-def repeat(val:object, n:int) -> [object]:
-    return [ val for _ in range(n) ]

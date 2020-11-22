@@ -1,6 +1,6 @@
 from .args import Namespace, parse_args
 from .coverage_data import compute_coverage_data
-from .make_table import make_table
+from .text_output import output_as_text as tdump
 from .parse_kle import parse_kle
 from .path import get_json_and_yaml_files
 from json import dumps as jdump
@@ -20,11 +20,11 @@ def main(args:[str]) -> int:
     target_layouts:[Tuple[str, List[dict]]] = list(map(parse_named_kle, target_layout_files))
 
     # Analyse coverage
-    coverage_data:[dict] = compute_coverage_data(target_layouts, input_layouts)
+    coverage_data:[[dict]] = compute_coverage_data(target_layouts, input_layouts)
 
     # Output coverage data
     output_formatter:dict = {
-        'text': make_table,
+        'text': tdump,
         'json': jdump,
         'yaml': ydump,
     }
@@ -37,4 +37,3 @@ def main(args:[str]) -> int:
 
 def parse_named_kle(fname:str) -> Tuple[str, List[dict]]:
     return (fname, parse_kle(fname))
-
