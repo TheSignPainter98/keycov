@@ -2,8 +2,11 @@ from .util import repeat
 from os import linesep
 from texttable import Texttable as TextTable
 
-def output_as_text(coverage_data:[[dict]]) -> str:
-    return (linesep * 2).join(list(map(make_table, coverage_data)))
+def output_as_text(coverage_data:dict) -> str:
+    return (linesep * 2).join(list(map(format_category, coverage_data.values())))
+
+def format_category(coverage_data:tuple) -> str:
+    return make_table(coverage_data)
 
 def make_table(table_data:[dict]) -> str:
     if table_data == []:
@@ -36,6 +39,7 @@ def _format_field(val:object) -> str:
         float: lambda f: '%.2f' % f,
         str: lambda s: s,
         bool: lambda b: '✓' if b else '✗',
-        list: lambda l: ', '.join(list(map(_format_field, l)))
+        list: lambda l: ', '.join(list(map(_format_field, l))),
+        type(None): lambda _: ''
     }
     return convs[type(val)](val)

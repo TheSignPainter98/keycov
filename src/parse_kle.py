@@ -6,11 +6,17 @@ from typing import Union
 parser_initial_state:dict = {
     'p': 'R2',
     'd': False,
-    'g': False
+    'g': False,
+    'h': 1.0,
+    'w': 1.0,
+    'h2': 1.0,
+    'w2': 1.0,
+    'l': False,
+    'n': False
 }
 parser_state_keys:[dict] = parser_initial_state.keys()
-parser_state_reset_keys:[str] = ['d']
-parser_state_output_keys:[str] = ['p']
+parser_state_reset_keys:[str] = ['d', 'w', 'h', 'w2', 'h2', 'l', 'n']
+parser_state_output_keys:[str] = ['p', 'w', 'h', 'w2', 'h2', 'l', 'n']
 
 def parse_kle(fname:str) -> [dict]:
     return parse_kle_raw(read_yaml(fname))

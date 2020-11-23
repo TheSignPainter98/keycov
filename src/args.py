@@ -1,7 +1,7 @@
 # Copyright (C) Edward Jones
 
-from .coverage_data import analyses
-from .util import repeat, restrict_dict
+from .coverage_analyser import analyses
+from .util import dict_union, dict_union_ignore_none, repeat, restrict_dict
 from argparse import ArgumentParser, Namespace
 from functools import reduce
 from os import linesep
@@ -130,14 +130,6 @@ def get_long_help() -> str:
     table:TextTable = TextTable()
     table.set_deco(0)
     table.set_header_align(repeat('l', 2))
-    table.add_rows(list(map(lambda a: [a['pretty-name'], a['description']], analyses)), header=False)
+    table.add_rows(list(map(lambda a: [a['pretty-name'], a['description']], filter(lambda a: 'pretty-name' in a, analyses))), header=False)
 
     return linesep + 'analyses to be performed:' + linesep + table.draw()
-
-def dict_union_ignore_none(a: dict, b: dict) -> dict:
-    return dict(a, **dict(filter(lambda p: p[1] is not None, b.items())))
-
-def dict_union(*ds:[dict]) -> dict:
-    def _dict_union(a:dict, b:dict) -> dict:
-        return dict(a, **b)
-    return dict(reduce(_dict_union, ds, {}))
