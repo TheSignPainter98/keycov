@@ -1,6 +1,10 @@
 from .util import repeat
 from os import linesep
+from shutil import get_terminal_size
 from texttable import Texttable as TextTable
+from typing import Tuple
+
+default_dims:Tuple[int, int] = (80, 24)
 
 def output_as_text(coverage_data:dict) -> str:
     return (linesep * 2).join(list(map(format_category, coverage_data.values())))
@@ -21,6 +25,7 @@ def make_table(table_data:[dict]) -> str:
     table.set_chars(['─', '│', '┼', '─'])
     table.set_header_align(repeat('l', num_cols))
     table.set_cols_dtype(repeat(_format_field, num_cols))
+    table.set_max_width(get_terminal_size(default_dims).columns)
 
     # Apply header
     col_names:[str] = list(map(str, table_data[0].keys()))
