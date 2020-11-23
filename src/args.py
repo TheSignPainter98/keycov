@@ -63,6 +63,24 @@ args:[dict] = [
             'yaml',
             'json'
         ]
+    },
+    {
+        'dest': 'force_colour',
+        'short': '-C',
+        'long': '--colour',
+        'action': 'store_true',
+        'help': 'Force colour output (override default heuristics)',
+        'type': bool,
+        'default': False
+    },
+    {
+        'dest': 'force_no_colour',
+        'short': '-c',
+        'long': '--no-colour',
+        'action': 'store_true',
+        'help': 'Force no colour output (override default heuristics)',
+        'type': bool,
+        'default': False
     }
 ]
 arg_dict:dict = { a['dest']: a for a in args if 'dest' in a }

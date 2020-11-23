@@ -1,6 +1,6 @@
 from .args import Namespace, parse_args
 from .coverage_analyser import analyse_coverage
-from .text_output import output_as_text as tdump
+from .text_output import output_as_text
 from .parse_kle import parse_kle
 from .path import get_json_and_yaml_files
 from .util import serialise_key
@@ -27,6 +27,7 @@ def main(args:[str]) -> int:
     coverage_data:[[dict]] = analyse_coverage(target_layouts, input_layouts)
 
     # Output coverage data
+    tdump:Callable = lambda cd: output_as_text(pargs, cd)
     output_formatter:dict = {
         'text': tdump,
         'json': jdump,
