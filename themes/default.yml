@@ -18,6 +18,7 @@ formats:
     - bold
     - blue
   path_format: underline
+  keycap_name_format: green
   empty_string_format:
     - bold
     - red

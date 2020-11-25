@@ -2,6 +2,16 @@ from functools import reduce
 from typing import Tuple
 
 default_terminal_dims:Tuple[int, int] = (80, 24)
+special_properties:dict = {
+    'H': lambda k: k['n'],
+    'I': lambda k: k['w'] == 1.25 \
+        and k['h'] == 2 \
+        and k['w2'] == 1.5 \
+        and k['h2'] == 1 \
+        and k['x2'] == -0.25,
+    'S': lambda k: k['l'],
+}
+
 
 def flatten(obj:object) -> [object]:
     if type(obj) == list:
@@ -43,16 +53,6 @@ def serialise_key(key:dict) -> str:
     return key_pretty_name(key)
 
 def key_pretty_name(key:dict) -> str:
-    special_properties:dict = {
-        'H': lambda k: k['n'],
-        'I': lambda k: k['w'] == 1.25 \
-            and k['h'] == 2 \
-            and k['w2'] == 1.5 \
-            and k['h2'] == 1 \
-            and k['x2'] == -0.25,
-        'S': lambda k: k['l'],
-    }
-
     name:str = key['key'].replace('\n', '_').replace(' ', '+')
     dimensions:str = '%.2fx%.2f' %(key['w'], key['h'])
     if (key['w2'] != key['w'] or key['h2'] != key['h']) and (key['w2'] != 1.0 or key['h2'] != 1.0):

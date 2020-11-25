@@ -1,8 +1,10 @@
 from .args import Namespace
-from .util import default_terminal_dims, dict_union, fst
+from .util import default_terminal_dims, dict_union, fst, special_properties
 from .yaml_io import read_yaml
 from beautifultable import ALIGN_LEFT, BeautifulTable
 from os import environ, linesep
+from os.path import sep
+from re import match
 from shutil import get_terminal_size
 from sys import platform, stdout
 from types import SimpleNamespace
@@ -24,6 +26,8 @@ default_formats:dict = {
 }
 float_output_precision:int = 2
 END_CODE:int = '\033[0m'
+
+keycap_pretty_name_regex:str = r'^[^ \n]*[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}(\[[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}\])?(-[%s]+)?$' % ''.join(special_properties.keys())
 
 def output_as_text(pargs:Namespace, coverage_data:dict) -> str:
     global formats, terminal_formats
@@ -79,11 +83,15 @@ def _format_field(pargs:Namespace, val:object) -> str:
     return convs[type(val)](val)
 
 def format_str(pargs:Namespace, s:str) -> str:
-    if (pargs.input_dir and s.startswith(pargs.input_dir)) or (pargs.target_dir and s.startswith(pargs.target_dir)) or s[-4:] in ['.json', '.yml', '.yaml']:
-        return apply_formatting(pargs, formats.path_format, s)
     if not s:
         return apply_formatting(pargs, formats.empty_string_format, formats.empty_string_string)
-    return s
+    def format_word(pargs:Namespace, s:str) -> str:
+        if (pargs.input_dir and s.startswith(pargs.input_dir)) or (pargs.target_dir and s.startswith(pargs.target_dir)) or s[-4:] in ['.json', '.yml', '.yaml'] or s.endswith(sep):
+            return apply_formatting(pargs, formats.path_format, s)
+        if match(keycap_pretty_name_regex, s) is not None:
+            return apply_formatting(pargs, formats.keycap_name_format, s)
+        return s
+    return ' '.join(list(map(lambda w: format_word(pargs, w), s.split())))
 
 def format_list(pargs:Namespace, l:list) -> str:
     if l == []:
