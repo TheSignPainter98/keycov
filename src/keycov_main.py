@@ -6,7 +6,6 @@ from .path import get_json_and_yaml_files
 from .util import key_pretty_name, serialise_key
 from json import dumps as jdump
 from os import linesep
-from texttable import Texttable
 from typing import List, Tuple
 from yaml import dump as ydump
 
