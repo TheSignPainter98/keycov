@@ -80,6 +80,7 @@ analyses:[dict] = [
     {
         'name': 'covering_set_of_lowest_units_surplus',
         'pretty-name': 'Minimal-unit covering sets surplus',
+        'description': 'Shows the least amount of surplus units (waste plastic) required by any set of kits which covers a particular keyboard',
         'verbosity': 1,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
@@ -89,6 +90,7 @@ analyses:[dict] = [
     {
         'name': 'covering_set_of_lowest_units_value',
         'pretty-name': 'Minimal-unit covering set',
+        'description': 'The set of kits with minimal surplus units which covers a particular keyboard',
         'verbosity': 3,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
@@ -105,6 +107,7 @@ analyses:[dict] = [
     {
         'name': 'covering_set_of_lowest_cardinality_amount',
         'pretty-name': 'Smallest covering set size',
+        'description': 'The smallest number of kits required to cover a particular keyboard',
         'verbosity': 2,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
@@ -114,6 +117,7 @@ analyses:[dict] = [
     {
         'name': 'covering_set_of_lowest_cardinality_value',
         'pretty-name': 'Smallest covering set',
+        'description': 'The smallest set of kits which covers a particular keyboard',
         'verbosity': 3,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
