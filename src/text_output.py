@@ -1,18 +1,22 @@
 from .args import Namespace
 from .util import repeat
+from beautifultable import ALIGN_LEFT, BeautifulTable
 from os import environ, linesep
+from shutil import get_terminal_size
 from sys import platform, stdout
-from texttable import Texttable as TextTable
+from typing import Tuple
 
-PURPLE = 0x1
-CYAN = 0x2
-DARKCYAN = 0x4
-BLUE = 0x8
-GREEN = 0x10
-YELLOW = 0x20
-RED = 0x40
-BOLD = 0x80
-UNDERLINE = 0x100
+default_terminal_size:Tuple[int, int] = (80, 24)
+
+PURPLE:int = 0x1
+CYAN:int = 0x2
+DARKCYAN:int = 0x4
+BLUE:int = 0x8
+GREEN:int = 0x10
+YELLOW:int = 0x20
+RED:int = 0x40
+BOLD:int = 0x80
+UNDERLINE:int = 0x100
 
 terminal_formats:dict = {
     PURPLE: '\033[95m',
@@ -29,6 +33,15 @@ END_CODE = '\033[0m'
 
 TICK_FORMAT:int = GREEN
 CROSS_FORMAT:int = RED
+NUM_FORMAT:int = DARKCYAN
+HEADER_FORMAT:int = BOLD | BLUE
+PATH_FORMAT:int = UNDERLINE
+EMPTY_STRING_FORMAT:int = BOLD | RED
+EMPTY_STRING_STRING:str = '/'
+EMPTY_LIST_FORMAT:int = EMPTY_STRING_FORMAT
+EMPTY_LIST_STRING:str = EMPTY_STRING_STRING
+NONE_FORMAT:int = RED
+NONE_STRING:str = '-'
 
 float_output_precision:int = 2
 
@@ -43,38 +56,54 @@ def make_table(pargs:Namespace, table_data:[dict]) -> str:
         return ''
 
     # Prep table
-    table:TextTable = TextTable()
-    num_cols:int = len(table_data[0].keys())
+    table:BeautifulTable = BeautifulTable()
 
-    # Set styling
-    table.set_deco(TextTable.HEADER)
-    table.set_chars(['─', '│', '┼', '─'])
-    table.set_header_align(repeat('l', num_cols))
-    table.set_cols_dtype(repeat(lambda f: _format_field(pargs, f), num_cols))
-    table.set_precision(float_output_precision)
-
-    # Apply header
+    # Add header
     col_names:[str] = list(map(str, table_data[0].keys()))
     col_names_order:dict = { c:p for p,c in enumerate(col_names) }
-    formatted_col_names:[str] = list(map(lambda c: apply_formatting(pargs, 0, c), col_names))
-    table.header(formatted_col_names)
+    table.columns.header = list(map(lambda c: apply_formatting(pargs, HEADER_FORMAT, c), col_names))
 
     # Add table body content
-    body:[[object]] = list(map(lambda r: list(map(lambda f: f[1], r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data)))
-    table.add_rows(body, header=False)
+    body:[[object]] = list(map(lambda r: list(map(lambda f: _format_field(pargs, f[1]), r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data)))
+    for record in body:
+        table.rows.append(record)
 
-    return table.draw()
+    # Apply styling
+    table.columns.alignment = ALIGN_LEFT
+    table.rows.alignment = ALIGN_LEFT
+    table.border.top = ''
+    table.border.right = ''
+    table.border.bottom = ''
+    table.border.left = ''
+    table.columns.header.separator = '─'
+    table.columns.separator = ''
+    table.rows.separator = ''
+    table.maxwidth = get_terminal_size(default_terminal_size).columns
+
+    return str(table)
 
 def _format_field(pargs:Namespace, val:object) -> str:
     convs:dict = {
-        int: str,
-        float: lambda f: ('%%.%df' % float_output_precision) % f,
-        str: lambda s: s,
+        int: lambda i: apply_formatting(pargs, NUM_FORMAT, str(i)),
+        float: lambda f: apply_formatting(pargs, NUM_FORMAT, ('%%.%df' % float_output_precision) % f),
+        str: lambda s: format_str(pargs, s),
         bool: lambda b: apply_formatting(pargs, TICK_FORMAT, '✓') if b else apply_formatting(pargs, CROSS_FORMAT, '✗'),
-        list: lambda l: ', '.join(list(map(lambda v: _format_field(pargs, v), l))),
-        type(None): lambda _: ''
+        list: lambda l: format_list(pargs, l),
+        type(None): lambda _: apply_formatting(pargs, NONE_FORMAT, NONE_STRING)
     }
     return convs[type(val)](val)
+
+def format_str(pargs:Namespace, s:str) -> str:
+    if (pargs.input_dir and s.startswith(pargs.input_dir)) or (pargs.target_dir and s.startswith(pargs.target_dir)) or s[-4:] in ['.json', '.yml', '.yaml']:
+        return apply_formatting(pargs, PATH_FORMAT, s)
+    if not s:
+        return apply_formatting(pargs, EMPTY_STRING_FORMAT, EMPTY_STRING_STRING)
+    return s
+
+def format_list(pargs:Namespace, l:list) -> str:
+    if l == []:
+        return apply_formatting(pargs, EMPTY_LIST_FORMAT, EMPTY_LIST_STRING)
+    return ', '.join(list(map(lambda v: _format_field(pargs, v), l)))
 
 def apply_formatting(pargs:Namespace, formatting:int, s:str) -> str:
     if not use_colour(pargs):
