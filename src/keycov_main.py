@@ -3,7 +3,7 @@ from .text_output import output_as_text
 from .analysis_runner import run_analyses
 from .parse_kle import parse_kle
 from .path import get_json_and_yaml_files
-from .util import serialise_key
+from .util import key_pretty_name, serialise_key
 from json import dumps as jdump
 from os import linesep
 from texttable import Texttable
@@ -47,9 +47,7 @@ def parse_named_kle(fname:str) -> Tuple[str, List[dict]]:
     return (fname, parse_kle(fname))
 
 def sanitise_layouts(target_layouts:[dict], input_layouts:[dict]):
-    for target_layout in target_layouts:
-        for key in target_layout[1]:
+    for layout in target_layouts + input_layouts:
+        for key in layout[1]:
             key['serialised'] = serialise_key(key)
-    for input_layout in input_layouts:
-        for key in input_layout[1]:
-            key['serialised'] = serialise_key(key)
+            key['pretty-name'] = key_pretty_name(key)

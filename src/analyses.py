@@ -142,10 +142,10 @@ def count_key_occurrences(layouts:Tuple[str, List[dict]]) -> dict:
     occurrences:dict = {}
     for layout in layouts:
         for key in layout[1]:
-            if key['serialised'] in occurrences:
-                occurrences[key['serialised']] += 1
+            if key['pretty-name'] in occurrences:
+                occurrences[key['pretty-name']] += 1
             else:
-                occurrences[key['serialised']] = 1
+                occurrences[key['pretty-name']] = 1
     return occurrences
 
 def count_units(_1:Namespace, _2:dict, layout:tuple) -> float:

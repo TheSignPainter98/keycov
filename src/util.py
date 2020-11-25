@@ -40,6 +40,9 @@ def mult(a:object, b:object) -> object:
     return a * b
 
 def serialise_key(key:dict) -> str:
+    return key_pretty_name(key)
+
+def key_pretty_name(key:dict) -> str:
     special_properties:dict = {
         'H': lambda k: k['n'],
         'I': lambda k: k['w'] == 1.25 \
