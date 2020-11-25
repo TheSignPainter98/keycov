@@ -22,7 +22,7 @@ Hopefully, this should make the task a little less painless, and lead to even be
 * [Installation](#installation)
 * [Usage](#usage)
 * [Contributing](#contributing)
-* [Author](#author)
+* [Author and Random Notes](#author-and-random-notes)
 
 <!-- vim-markdown-toc -->
 
@@ -74,14 +74,23 @@ This will output a basic set of analyses, as it has defaulted to verbosity level
 For more information, pass a higher verbosity number by running something like `python3 keycov.py --analysis-verbosity=3`
 Details on the analyses performed and the verbosity levels required to output them are shown by passing KeyCov the `--long-help` flag.
 
+Separate output formats are provided to allow KeyCov to interface with a more customer-friendly front-end (e.g a keycap set website).
+
 ## Contributing
 
 If you’d like to contribute, please abide by the [code of conduct.][code-of-conduct]
 
-## Author
+## Author and Random Notes
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
+
 I hope floating point errors don’t ruin the nice prime-based set data-structure I used [here.][prime-sets]
+
+Please don’t be surprised if KeyCov takes a while to perform its analyses, finding a minimum-size set of kits which cover a keyboard is believed to be a computationally-hard problem (the time to solve it scales very poorly with the size of the input).
+More specifically, it reduces to [set cover,][set-cover] a standard problem in theoretical computer science for which:
+
+1. We do not know of an algorithm which runs in less-than exponential time and,
+2. We do not know whether one _can_ or _cannot_ exist on our classical hardware.
 
 [code-of-conduct]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CODE_OF_CONDUCT.md
 [github]: http://www.github.com/TheSignPainter98/keycov
@@ -90,3 +99,4 @@ I hope floating point errors don’t ruin the nice prime-based set data-structur
 [pip3]: https://pip.pypa.io/en/stable/
 [prime-sets]: https://github.com/TheSignPainter98/keycov/blob/master/src/coverage_analyser.py#L8
 [python3]: https://www.python.org
+[set-cover]: https://www.geeksforgeeks.org/set-cover-problem-set-1-greedy-approximate-algorithm/
