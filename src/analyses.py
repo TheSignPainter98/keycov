@@ -80,7 +80,7 @@ analyses:[dict] = [
     {
         'name': 'covering_set_of_lowest_units_surplus',
         'pretty-name': 'Minimal-unit covering sets surplus',
-        'verbosity': 2,
+        'verbosity': 1,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
             '~covering_set_of_lowest_units'
