@@ -22,12 +22,12 @@ class AnalysisTypes:
 analyses:[dict] = [
     {
         'name': 'num_keebs',
-        'pretty-name': 'Layouts analysed',
+        'pretty-name': 'Total keyboards',
         'description': 'Total number of keyboard layouts analysed',
     },
     {
         'name': 'num_kits',
-        'pretty-name': 'Kits analysed',
+        'pretty-name': 'Total kits',
         'description': 'Total number of kits analysed',
     },
     {
@@ -38,7 +38,7 @@ analyses:[dict] = [
     },
     {
         'name': 'most_common_keeb_keys',
-        'pretty-name': 'Most common keys in keyboard layouts',
+        'pretty-name': 'Most common keys in keyboards',
         'description': 'Finds out the 10 keys which are the most common in the target keyboard layouts presented',
         'verbosity': 2
     },
@@ -79,6 +79,7 @@ analyses:[dict] = [
     },
     {
         'name': 'covering_set_of_lowest_units_surplus',
+        'pretty-name': 'Minimal-unit covering sets surplus',
         'verbosity': 2,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
@@ -87,6 +88,7 @@ analyses:[dict] = [
     },
     {
         'name': 'covering_set_of_lowest_units_value',
+        'pretty-name': 'Minimal-unit covering set',
         'verbosity': 3,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
@@ -102,6 +104,7 @@ analyses:[dict] = [
     },
     {
         'name': 'covering_set_of_lowest_cardinality_amount',
+        'pretty-name': 'Smallest covering set size',
         'verbosity': 2,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
@@ -110,6 +113,7 @@ analyses:[dict] = [
     },
     {
         'name': 'covering_set_of_lowest_cardinality_value',
+        'pretty-name': 'Smallest covering set',
         'verbosity': 3,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
