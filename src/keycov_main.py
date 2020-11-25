@@ -1,5 +1,5 @@
 from .args import Namespace, parse_args
-from .coverage_analyser import analyse_coverage
+from .analysis_runner import run_analyses
 from .text_output import output_as_text as tdump
 from .parse_kle import parse_kle
 from .path import get_json_and_yaml_files
@@ -24,20 +24,23 @@ def main(args:[str]) -> int:
     sanitise_layouts(target_layouts, input_layouts)
 
     # Analyse coverage
-    coverage_data:[[dict]] = analyse_coverage(target_layouts, input_layouts)
+    exit_code:int
+    coverage_data:List[dict]
+    (exit_code, coverage_data) = run_analyses(pargs, target_layouts, input_layouts)
 
     # Output coverage data
     output_formatter:dict = {
         'text': tdump,
         'json': jdump,
         'yaml': ydump,
+        'none': lambda _: '',
     }
     coverage_report:str = output_formatter[pargs.output_format](coverage_data)
     print(coverage_report, end='')
-    if not coverage_report.endswith(linesep):
+    if not coverage_report.endswith(linesep) and coverage_report:
         print()
 
-    return 0
+    return exit_code
 
 def parse_named_kle(fname:str) -> Tuple[str, List[dict]]:
     return (fname, parse_kle(fname))
