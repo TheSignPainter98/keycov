@@ -1,9 +1,11 @@
 from .args import Namespace
-from .util import repeat
+from .util import dict_union, repeat
+from .yaml_io import read_yaml
 from beautifultable import ALIGN_LEFT, BeautifulTable
 from os import environ, linesep
 from shutil import get_terminal_size
 from sys import platform, stdout
+from types import SimpleNamespace
 from typing import Tuple
 
 default_terminal_size:Tuple[int, int] = (80, 24)
@@ -18,34 +20,29 @@ RED:int = 0x40
 BOLD:int = 0x80
 UNDERLINE:int = 0x100
 
-terminal_formats:dict = {
-    PURPLE: '\033[95m',
-    CYAN: '\033[96m',
-    DARKCYAN: '\033[36m',
-    BLUE: '\033[94m',
-    GREEN: '\033[92m',
-    YELLOW: '\033[93m',
-    RED: '\033[91m',
-    BOLD: '\033[1m',
-    UNDERLINE: '\033[4m',
+terminal_formats:dict = {}
+formats:SimpleNamespace = None
+default_formats:dict = {
+    'tick_format': 0,
+    'cross_format': 0,
+    'num_format': 0,
+    'header_format': 0,
+    'path_format': 0,
+    'empty_string_format': 0,
+    'empty_string_string': '/',
+    'empty_list_format': 0,
+    'empty_list_string': '∅',
+    'none_format': 0,
+    'none_string': '-',
 }
-END_CODE = '\033[0m'
-
-TICK_FORMAT:int = GREEN
-CROSS_FORMAT:int = RED
-NUM_FORMAT:int = DARKCYAN
-HEADER_FORMAT:int = BOLD | BLUE
-PATH_FORMAT:int = UNDERLINE
-EMPTY_STRING_FORMAT:int = BOLD | RED
-EMPTY_STRING_STRING:str = '/'
-EMPTY_LIST_FORMAT:int = EMPTY_STRING_FORMAT
-EMPTY_LIST_STRING:str = EMPTY_STRING_STRING
-NONE_FORMAT:int = RED
-NONE_STRING:str = '-'
-
 float_output_precision:int = 2
+END_CODE:int = '\033[0m'
 
 def output_as_text(pargs:Namespace, coverage_data:dict) -> str:
+    global formats, terminal_formats
+    theme:dict = read_yaml(pargs.theme)
+    terminal_formats = theme['terminal_formats']
+    formats = SimpleNamespace(**dict_union(default_formats, theme['formats']))
     return (linesep * 2).join(list(map(lambda c: format_category(pargs, c), coverage_data.values())))
 
 def format_category(pargs:Namespace, coverage_data:tuple) -> str:
@@ -61,7 +58,7 @@ def make_table(pargs:Namespace, table_data:[dict]) -> str:
     # Add header
     col_names:[str] = list(map(str, table_data[0].keys()))
     col_names_order:dict = { c:p for p,c in enumerate(col_names) }
-    table.columns.header = list(map(lambda c: apply_formatting(pargs, HEADER_FORMAT, c), col_names))
+    table.columns.header = list(map(lambda c: apply_formatting(pargs, formats.header_format, c), col_names))
 
     # Add table body content
     body:[[object]] = list(map(lambda r: list(map(lambda f: _format_field(pargs, f[1]), r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data)))
@@ -79,25 +76,26 @@ def make_table(pargs:Namespace, table_data:[dict]) -> str:
     table.columns.separator = ''
     table.rows.separator = ''
     table.maxwidth = get_terminal_size(default_terminal_size).columns
+    table.detect_numerics = False
 
     return str(table)
 
 def _format_field(pargs:Namespace, val:object) -> str:
     convs:dict = {
-        int: lambda i: apply_formatting(pargs, NUM_FORMAT, str(i)),
-        float: lambda f: apply_formatting(pargs, NUM_FORMAT, ('%%.%df' % float_output_precision) % f),
+        int: lambda i: apply_formatting(pargs, formats.num_format, str(i)),
+        float: lambda f: apply_formatting(pargs, formats.num_format, '%%.%df' % float_output_precision % f),
         str: lambda s: format_str(pargs, s),
-        bool: lambda b: apply_formatting(pargs, TICK_FORMAT, '✓') if b else apply_formatting(pargs, CROSS_FORMAT, '✗'),
+        bool: lambda b: apply_formatting(pargs, formats.tick_format, '✓') if b else apply_formatting(pargs, formats.cross_format, '✗'),
         list: lambda l: format_list(pargs, l),
-        type(None): lambda _: apply_formatting(pargs, NONE_FORMAT, NONE_STRING)
+        type(None): lambda _: apply_formatting(pargs, formats.none_format, formats.none_string)
     }
     return convs[type(val)](val)
 
 def format_str(pargs:Namespace, s:str) -> str:
     if (pargs.input_dir and s.startswith(pargs.input_dir)) or (pargs.target_dir and s.startswith(pargs.target_dir)) or s[-4:] in ['.json', '.yml', '.yaml']:
-        return apply_formatting(pargs, PATH_FORMAT, s)
+        return apply_formatting(pargs, formats.path_format, s)
     if not s:
-        return apply_formatting(pargs, EMPTY_STRING_FORMAT, EMPTY_STRING_STRING)
+        return apply_formatting(pargs, formats.empty_string_format, formats.empty_string_string)
     return s
 
 def format_list(pargs:Namespace, l:list) -> str:
@@ -110,9 +108,14 @@ def apply_formatting(pargs:Namespace, formatting:int, s:str) -> str:
         return s
 
     formatting_codes:str = ''
-    for terminal_format in terminal_formats:
-        if formatting & terminal_format:
-            formatting_codes += terminal_formats[terminal_format]
+    formats_to_apply:[str]
+    if type(formatting) == list:
+        formats_to_apply = formatting
+    else:
+        formats_to_apply = [formatting]
+    for format_to_apply in formats_to_apply:
+        formatting_codes += '\033[' + terminal_formats[format_to_apply]
+
     end_formatting:str = END_CODE if formatting_codes else ''
     return formatting_codes + s + end_formatting
 

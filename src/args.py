@@ -81,6 +81,15 @@ args:[dict] = [
         'help': 'Force no colour output (override default heuristics)',
         'type': bool,
         'default': False
+    },
+    {
+        'dest': 'theme',
+        'short': '-t',
+        'long': '--theme',
+        'action': 'store',
+        'help': 'Set the colour theme for the text output tables',
+        'type': str,
+        'default': 'themes/default.yml'
     }
 ]
 arg_dict:dict = { a['dest']: a for a in args if 'dest' in a }

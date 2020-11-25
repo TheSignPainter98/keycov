@@ -1,6 +1,6 @@
 from os.path import exists
 from re import Match, search
-from sys import exit, stdin
+from sys import exit, stderr
 from yaml import safe_load
 
 

@@ -1,0 +1,30 @@
+# Define available effects as ANSI codes WITHOUT the initial '\033['
+terminal_formats:
+  purple: 95m
+  cyan: 96m
+  darkcyan: 36m
+  blue: 94m
+  green: 92m
+  yellow: 93m
+  red: 91m
+  bold: 1m
+  underline: 4m
+# Assignment of available colours to formatting categories
+formats:
+  tick_format: green
+  cross_format: red
+  num_format: darkcyan
+  header_format:
+    - bold
+    - blue
+  path_format: underline
+  empty_string_format:
+    - bold
+    - red
+  empty_string_string: /
+  empty_list_format:
+    - bold
+    - red
+  empty_list_string: ∅
+  none_format: red
+  none_string: '-'
