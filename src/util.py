@@ -1,4 +1,7 @@
 from functools import reduce
+from typing import Tuple
+
+default_terminal_dims:Tuple[int, int] = (80, 24)
 
 def flatten(obj:object) -> [object]:
     if type(obj) == list:
@@ -29,6 +32,12 @@ def dict_union(*ds:[dict]) -> dict:
     def _dict_union(a:dict, b:dict) -> dict:
         return dict(a, **b)
     return dict(reduce(_dict_union, ds, {}))
+
+def add(a:object, b:object) -> object:
+    return a + b
+
+def mult(a:object, b:object) -> object:
+    return a * b
 
 def serialise_key(key:dict) -> str:
     special_properties:dict = {

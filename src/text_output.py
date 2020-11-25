@@ -1,24 +1,11 @@
 from .args import Namespace
-from .util import dict_union, repeat
+from .util import default_terminal_dims, dict_union, fst
 from .yaml_io import read_yaml
 from beautifultable import ALIGN_LEFT, BeautifulTable
 from os import environ, linesep
 from shutil import get_terminal_size
 from sys import platform, stdout
 from types import SimpleNamespace
-from typing import Tuple
-
-default_terminal_size:Tuple[int, int] = (80, 24)
-
-PURPLE:int = 0x1
-CYAN:int = 0x2
-DARKCYAN:int = 0x4
-BLUE:int = 0x8
-GREEN:int = 0x10
-YELLOW:int = 0x20
-RED:int = 0x40
-BOLD:int = 0x80
-UNDERLINE:int = 0x100
 
 terminal_formats:dict = {}
 formats:SimpleNamespace = None
@@ -43,10 +30,10 @@ def output_as_text(pargs:Namespace, coverage_data:dict) -> str:
     theme:dict = read_yaml(pargs.theme)
     terminal_formats = theme['terminal_formats']
     formats = SimpleNamespace(**dict_union(default_formats, theme['formats']))
-    return (linesep * 2).join(list(map(lambda c: format_category(pargs, c), coverage_data.values())))
+    return (linesep * 2).join(list(filter(lambda c: c, map(lambda p: format_category(pargs, p), sorted(coverage_data.items(), key=fst)))))
 
-def format_category(pargs:Namespace, coverage_data:tuple) -> str:
-    return make_table(pargs, coverage_data)
+def format_category(pargs, coverage_data:tuple) -> str:
+    return linesep.join([coverage_data[0] + ':', make_table(pargs, coverage_data[1])])
 
 def make_table(pargs:Namespace, table_data:[dict]) -> str:
     if table_data == []:
@@ -75,7 +62,7 @@ def make_table(pargs:Namespace, table_data:[dict]) -> str:
     table.columns.header.separator = '─'
     table.columns.separator = ''
     table.rows.separator = ''
-    table.maxwidth = get_terminal_size(default_terminal_size).columns
+    table.maxwidth = get_terminal_size(default_terminal_dims).columns
     table.detect_numerics = False
 
     return str(table)

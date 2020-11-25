@@ -1,10 +1,11 @@
 # Copyright (C) Edward Jones
 
-from .coverage_analyser import analyses
-from .util import dict_union, dict_union_ignore_none, repeat, restrict_dict
+from .analyses import analyses, DEFAULT_VERBOSITY
+from .util import default_terminal_dims, dict_union, dict_union_ignore_none, repeat, restrict_dict
 from argparse import ArgumentParser, Namespace
 from functools import reduce
 from os import linesep
+from shutil import get_terminal_size
 from texttable import Texttable as TextTable
 from sys import exit, stderr
 
@@ -61,7 +62,35 @@ args:[dict] = [
         'choices': [
             'text',
             'yaml',
-            'json'
+            'json',
+            'none'
+        ]
+    },
+    {
+        'dest': 'output_list_cutoff',
+        'short': '-L',
+        'long': '--list-cutoff',
+        'action': 'store',
+        'help': 'Limit the number of elements in list fields',
+        'type': int,
+        'metavar': 'num',
+        'default': 5
+    },
+    {
+        'dest': 'analysis_verbosity',
+        'short': '-v',
+        'long': '--analysis-verbosity',
+        'metavar': 'level',
+        'action': 'store',
+        'help': 'Set the verbosity of analyses performed outputted',
+        'type': int,
+        'matavar': 'level',
+        'default': 1,
+        'choices': [
+            0,
+            1,
+            2,
+            3,
         ]
     },
     {
@@ -157,6 +186,7 @@ def get_long_help() -> str:
     table:TextTable = TextTable()
     table.set_deco(0)
     table.set_header_align(repeat('l', 2))
-    table.add_rows(list(map(lambda a: [a['pretty-name'], a['description']], filter(lambda a: 'pretty-name' in a, analyses))), header=False)
+    table.set_max_width(get_terminal_size(default_terminal_dims).columns)
+    table.add_rows(list(map(lambda a: [a['pretty-name'], a['description'] + ' (verbosity: %d)' %(a['verbosity'] if 'verbosity' in a else DEFAULT_VERBOSITY)], filter(lambda a: 'pretty-name' in a, analyses))), header=False)
 
     return linesep + 'analyses to be performed:' + linesep + table.draw()
