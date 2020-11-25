@@ -3,3 +3,5 @@ types_*.taghl
 __pycache__/
 *.ignored
 *.swp
+*.zip
+requirements.txt
