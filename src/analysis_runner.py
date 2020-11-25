@@ -112,8 +112,8 @@ def sanitise(coverage_data:Union[dict, List[dict]]) -> dict:
 
     key_map:dict = {
         'global-results': 'General analysis',
-        'local-keeb-results': 'Keyboard-specific analysis results',
-        'local-kit-results': 'Kit-specific analysis results',
+        'local-keeb-results': 'Keyboard-specific analysis',
+        'local-kit-results': 'Kit-specific analysis',
     }
     renamed_coverage_data:dict = dict(map(lambda p: (key_map[p[0]], p[1]), coverage_data.items()))
 

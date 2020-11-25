@@ -1,48 +1,127 @@
-from .util import default_terminal_dims, fst, repeat, snd
-from os import linesep
+from .args import Namespace
+from .util import default_terminal_dims, dict_union, fst, special_properties
+from .yaml_io import read_yaml
+from beautifultable import ALIGN_LEFT, BeautifulTable
+from os import environ, linesep
+from os.path import sep
+from re import match
 from shutil import get_terminal_size
-from texttable import Texttable as TextTable
-from typing import Tuple
+from sys import platform, stdout
+from types import SimpleNamespace
 
-def output_as_text(coverage_data:dict) -> str:
-    return (linesep * 2).join(list(filter(lambda c: c, map(format_category, sorted(coverage_data.items(), key=fst)))))
+terminal_formats:dict = {}
+formats:SimpleNamespace = None
+default_formats:dict = {
+    'tick_format': 0,
+    'cross_format': 0,
+    'num_format': 0,
+    'header_format': 0,
+    'path_format': 0,
+    'empty_string_format': 0,
+    'empty_string_string': '/',
+    'empty_list_format': 0,
+    'empty_list_string': '∅',
+    'none_format': 0,
+    'none_string': '-',
+}
+float_output_precision:int = 2
+END_CODE:int = '\033[0m'
 
-def format_category(coverage_data:tuple) -> str:
-    return linesep.join([coverage_data[0] + ':', make_table(coverage_data[1])])
+keycap_pretty_name_regex:str = r'^[^ \n]*[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}(\[[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}\])?(-[%s]+)?$' % ''.join(special_properties.keys())
 
-def make_table(table_data:[dict]) -> str:
+def output_as_text(pargs:Namespace, coverage_data:dict) -> str:
+    global formats, terminal_formats
+    theme:dict = read_yaml(pargs.theme)
+    terminal_formats = theme['terminal_formats']
+    formats = SimpleNamespace(**dict_union(default_formats, theme['formats']))
+    return (linesep * 2).join(list(filter(lambda c: c, map(lambda p: format_category(pargs, p), sorted(coverage_data.items(), key=fst)))))
+
+def format_category(pargs, coverage_data:tuple) -> str:
+    return linesep.join([coverage_data[0] + ':', make_table(pargs, coverage_data[1])])
+
+def make_table(pargs:Namespace, table_data:[dict]) -> str:
     if table_data == []:
         return ''
 
     # Prep table
-    table:TextTable = TextTable()
-    num_cols:int = len(table_data[0].keys())
+    table:BeautifulTable = BeautifulTable()
 
-    # Set styling
-    table.set_deco(TextTable.HEADER)
-    table.set_chars(['─', '│', '┼', '─'])
-    table.set_header_align(repeat('l', num_cols))
-    table.set_cols_dtype(repeat(_format_field, num_cols))
-    table.set_max_width(get_terminal_size(default_terminal_dims).columns)
-
-    # Apply header
+    # Add header
     col_names:[str] = list(map(str, table_data[0].keys()))
     col_names_order:dict = { c:p for p,c in enumerate(col_names) }
-    table.header(col_names)
+    table.columns.header = list(map(lambda c: apply_formatting(pargs, formats.header_format, c), col_names))
 
     # Add table body content
-    body:[[object]] = list(map(lambda r: list(map(lambda f: f[1], r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data)))
-    table.add_rows(body, header=False)
+    body:[[object]] = list(map(lambda r: list(map(lambda f: _format_field(pargs, f[1]), r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data)))
+    for record in body:
+        table.rows.append(record)
 
-    return table.draw()
+    # Apply styling
+    table.columns.alignment = ALIGN_LEFT
+    table.rows.alignment = ALIGN_LEFT
+    table.border.top = ''
+    table.border.right = ''
+    table.border.bottom = ''
+    table.border.left = ''
+    table.columns.header.separator = '─'
+    table.columns.separator = ''
+    table.rows.separator = ''
+    table.maxwidth = get_terminal_size(default_terminal_dims).columns
+    table.detect_numerics = False
 
-def _format_field(val:object) -> str:
+    return str(table)
+
+def _format_field(pargs:Namespace, val:object) -> str:
     convs:dict = {
-        int: str,
-        float: lambda f: '%.2f' % f,
-        str: lambda s: s,
-        bool: lambda b: '✓' if b else '✗',
-        list: lambda l: ', '.join(list(map(_format_field, l))),
-        type(None): lambda _: ''
+        int: lambda i: apply_formatting(pargs, formats.num_format, str(i)),
+        float: lambda f: apply_formatting(pargs, formats.num_format, '%%.%df' % float_output_precision % f),
+        str: lambda s: format_str(pargs, s),
+        bool: lambda b: apply_formatting(pargs, formats.tick_format, '✓') if b else apply_formatting(pargs, formats.cross_format, '✗'),
+        list: lambda l: format_list(pargs, l),
+        type(None): lambda _: apply_formatting(pargs, formats.none_format, formats.none_string)
     }
     return convs[type(val)](val)
+
+def format_str(pargs:Namespace, s:str) -> str:
+    if not s:
+        return apply_formatting(pargs, formats.empty_string_format, formats.empty_string_string)
+    def format_word(pargs:Namespace, s:str) -> str:
+        if (pargs.input_dir and s.startswith(pargs.input_dir)) or (pargs.target_dir and s.startswith(pargs.target_dir)) or s[-4:] in ['.json', '.yml', '.yaml'] or s.endswith(sep):
+            return apply_formatting(pargs, formats.path_format, s)
+        if match(keycap_pretty_name_regex, s) is not None:
+            return apply_formatting(pargs, formats.keycap_name_format, s)
+        return s
+    return ' '.join(list(map(lambda w: format_word(pargs, w), s.split())))
+
+def format_list(pargs:Namespace, l:list) -> str:
+    if l == []:
+        return apply_formatting(pargs, EMPTY_LIST_FORMAT, EMPTY_LIST_STRING)
+    return ', '.join(list(map(lambda v: _format_field(pargs, v), l)))
+
+def apply_formatting(pargs:Namespace, formatting:int, s:str) -> str:
+    if not use_colour(pargs):
+        return s
+
+    formatting_codes:str = ''
+    formats_to_apply:[str]
+    if type(formatting) == list:
+        formats_to_apply = formatting
+    else:
+        formats_to_apply = [formatting]
+    for format_to_apply in formats_to_apply:
+        formatting_codes += '\033[' + terminal_formats[format_to_apply]
+
+    end_formatting:str = END_CODE if formatting_codes else ''
+    return formatting_codes + s + end_formatting
+
+def use_colour(pargs:Namespace, file=stdout) -> bool:
+    plat:str = platform
+    supported_platform:bool = plat != 'Pocket PC' and (plat != 'win32' or 'ANSICON' in environ)
+    # isatty is not always implemented, but it'll have to do.
+    is_a_tty:bool = hasattr(file, 'isatty') and file.isatty()
+
+    if pargs.force_colour:
+        return True
+    if pargs.force_no_colour:
+        return False
+    return supported_platform and is_a_tty

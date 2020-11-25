@@ -3,13 +3,18 @@
 from .analyses import analyses, DEFAULT_VERBOSITY
 from .util import default_terminal_dims, dict_union, dict_union_ignore_none, repeat, restrict_dict
 from argparse import ArgumentParser, Namespace
+from beautifultable import ALIGN_LEFT, BeautifulTable
 from functools import reduce
 from os import linesep
+from os.path import normpath, sep
 from shutil import get_terminal_size
-from texttable import Texttable as TextTable
 from sys import exit, stderr
+from typing import Callable
 
 description:str = 'A little script for helping keycap designers analyse kitting coverage'
+
+dir_str:Callable = lambda s: normpath(s) + sep
+
 
 args:[dict] = [
     {
@@ -37,6 +42,7 @@ args:[dict] = [
         'action': 'store',
         'help': 'Specify the directory from which kit kle files are read',
         'type': str,
+        'sanitiser': dir_str,
         'metavar': 'dir',
         'default': 'kits'
     },
@@ -47,6 +53,7 @@ args:[dict] = [
         'action': 'store',
         'help': 'Specify the directory from which layouts to cover files are read',
         'type': str,
+        'sanitiser': dir_str,
         'metavar': 'dir',
         'default': 'keebs'
     },
@@ -92,6 +99,34 @@ args:[dict] = [
             2,
             3,
         ]
+    },
+    {
+        'dest': 'force_colour',
+        'short': '-C',
+        'long': '--colour',
+        'action': 'store_true',
+        'help': 'Force colour output (override default heuristics)',
+        'type': bool,
+        'default': False
+    },
+    {
+        'dest': 'force_no_colour',
+        'short': '-c',
+        'long': '--no-colour',
+        'action': 'store_true',
+        'help': 'Force no colour output (override default heuristics)',
+        'type': bool,
+        'default': False
+    },
+    {
+        'dest': 'theme',
+        'short': '-t',
+        'long': '--theme',
+        'action': 'store',
+        'metavar': 'theme',
+        'help': 'Set the colour theme for the text output tables',
+        'type': str,
+        'default': 'themes/default.yml'
     }
 ]
 arg_dict:dict = { a['dest']: a for a in args if 'dest' in a }
@@ -130,6 +165,11 @@ def parse_args(iargs: tuple) -> Namespace:
         print(checkResult, file=stderr)
         exit(-1)
 
+    # Sanitise arguments
+    for arg in args:
+        if 'sanitiser' in arg:
+            rargs[arg['dest']] = arg['sanitiser'](rargs[arg['dest']])
+
     npargs:Namespace = Namespace(**rargs)
     if npargs.show_help:
         ap.print_help()
@@ -156,10 +196,23 @@ def arg_inf(arg:dict) -> str:
     return ''
 
 def get_long_help() -> str:
-    table:TextTable = TextTable()
-    table.set_deco(0)
-    table.set_header_align(repeat('l', 2))
-    table.set_max_width(get_terminal_size(default_terminal_dims).columns)
-    table.add_rows(list(map(lambda a: [a['pretty-name'], a['description'] + ' (verbosity: %d)' %(a['verbosity'] if 'verbosity' in a else DEFAULT_VERBOSITY)], filter(lambda a: 'pretty-name' in a, analyses))), header=False)
+    table:BeautifulTable = BeautifulTable()
+    #  Add the data
+    for r in list(map(lambda a: [a['pretty-name'], a['description'] + ' (verbosity: %d)' %(a['verbosity'] if 'verbosity' in a else DEFAULT_VERBOSITY)], filter(lambda a: 'pretty-name' in a, analyses))):
+        table.rows.append(r)
 
-    return linesep + 'analyses to be performed:' + linesep + table.draw()
+    # Apply styling
+    table.columns.alignment = ALIGN_LEFT
+    table.rows.alignment = ALIGN_LEFT
+    table.border.top = ''
+    table.border.right = ''
+    table.border.bottom = ''
+    table.border.left = ''
+    table.columns.header.separator = '─'
+    table.columns.separator = ''
+    table.rows.separator = ''
+    table.maxwidth = get_terminal_size(default_terminal_dims).columns
+    table.detect_numerics = False
+
+
+    return linesep + 'analyses to be performed:' + linesep + str(table)
