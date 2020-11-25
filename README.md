@@ -38,7 +38,7 @@ pip3 install -r requirements.txt
 python3 keycov.py --help
 ```
 
-A message detailing the usage of `keycov` should now be visible, like the one below.
+A message detailing the usage of KeyCov should now be visible, like the one below.
 
 ```
 usage: keycov.py [-C] [-c] [-f format] [-h] [-H] [-k dir] [-l dir] [-L num]
@@ -56,14 +56,14 @@ optional arguments:
 
 ## Usage
 
-Before running, `keycov` will require two things:
+Before running, KeyCov will require two things:
 
 1. A folder containing the keyboards the user wishes to support (in [KLE][kle] format).
    By default this the `keebs/` directory next to `keycov.py`.
 2. A folder containing the kits the user proposes for their set (in [KLE][kle] format)
    By default this the `kits/` directory next to `keycov.py`.
 
-To run `keycov`, open a terminal and type the following (assuming that the [latest release][latest-release] was unzipped to `~/Downloads/keycov/`.
+To run KeyCov, open a terminal and type the following (assuming that the [latest release][latest-release] was unzipped to `~/Downloads/keycov/`.
 
 ```bash
 cd ~/Downloads/keycov/
@@ -72,7 +72,7 @@ python3 keycov.py
 
 This will output a basic set of analyses, as it has defaulted to verbosity level 1.
 For more information, pass a higher verbosity number by running something like `python3 keycov.py --analysis-verbosity=3`
-Details on the analyses performed and the verbosity levels required to output them are shown by passing `keycov` the `--long-help` flag.
+Details on the analyses performed and the verbosity levels required to output them are shown by passing KeyCov the `--long-help` flag.
 
 ## Contributing
 
