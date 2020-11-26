@@ -37,7 +37,8 @@ def output_as_text(pargs:Namespace, known_paths:[str], coverage_data:dict) -> st
     return (linesep * 2).join(list(filter(lambda c: c, map(lambda p: format_category(pargs, known_paths, p), sorted(coverage_data.items(), key=fst)))))
 
 def format_category(pargs, known_paths:[str], coverage_data:tuple) -> str:
-    return linesep.join([coverage_data[0] + ':', make_table(pargs, known_paths, coverage_data[1])])
+    formatted_table:str = make_table(pargs, known_paths, coverage_data[1])
+    return linesep.join([coverage_data[0] + ':', formatted_table]) if formatted_table else ''
 
 def make_table(pargs:Namespace, known_paths:[str], table_data:[dict]) -> str:
     if table_data == []:
