@@ -1,4 +1,4 @@
-from .util import add, fst, snd
+from .util import add, fst, snd, concat
 from .coverage_analyser import get_covering_sets
 from argparse import Namespace
 from functools import reduce
@@ -71,37 +71,58 @@ analyses:[dict] = [
         ]
     },
     {
-        'name': '~covering_set_of_lowest_units',
+        'name': '~count_covering_set_units',
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
             '~compute_covering_set'
         ]
     },
     {
-        'name': 'covering_set_of_lowest_units_surplus',
-        'pretty-name': 'Minimal-unit covering sets surplus',
-        'description': 'Shows the least amount of surplus units (waste plastic) required by any set of kits which covers a particular keyboard',
-        'verbosity': 1,
+        'name': '~covering_set_of_lowest_units',
+        'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
+        'requires': [
+            '~count_covering_set_units'
+        ]
+    },
+    {
+        'name': '~covering_set_of_lowest_units_surplus',
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
             '~covering_set_of_lowest_units'
         ]
     },
     {
-        'name': 'covering_set_of_lowest_units_value',
+        'name': 'covering_set_of_lowest_units_surplus_amount',
+        'pretty-name': 'Minimal-unit covering sets surplus',
+        'description': 'Shows the least amount of surplus units (waste plastic) required by any set of kits which covers a particular keyboard',
+        'verbosity': 1,
+        'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
+        'requires': [
+            '~covering_set_of_lowest_units_surplus'
+        ]
+    },
+    {
+        'name': 'covering_set_of_lowest_units_surplus_value',
         'pretty-name': 'Minimal-unit covering set',
         'description': 'The set of kits with minimal surplus units which covers a particular keyboard',
         'verbosity': 3,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
-            '~covering_set_of_lowest_units'
+            '~covering_set_of_lowest_units_surplus'
+        ]
+    },
+    {
+        'name': '~covering_set_cardinalities',
+        'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
+        'requires': [
+            '~compute_covering_set'
         ]
     },
     {
         'name': '~covering_set_of_lowest_cardinality',
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
-            '~compute_covering_set'
+            '~covering_set_cardinalities'
         ]
     },
     {
@@ -122,6 +143,31 @@ analyses:[dict] = [
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
             '~covering_set_of_lowest_cardinality'
+        ]
+    },
+    {
+        'name': 'most_cumbersome_keyboard',
+        'pretty-name': 'Keyboard requiring the most kits',
+        'description': 'The keyboard which requires a customer to purchase the most kits in order to cover it',
+        'requires': [
+            '~covering_set_cardinalities'
+        ]
+    },
+    {
+        'name': 'most_wasteful_keyboard',
+        'pretty-name': 'Keyboard with most surplus units to cover',
+        'description': 'The keyboard which requires the most wasted units of plastic to cover',
+        'requires': [
+            '~covering_set_of_lowest_units'
+        ]
+    },
+    {
+        'name': 'least_used_kit',
+        'pretty-name': 'Least-required kit',
+        'description': 'The kit which is required in the fewest setups',
+        'verbosity': 2,
+        'requires': [
+            '~compute_covering_set',
         ]
     },
 ]
@@ -176,27 +222,57 @@ def exists_covering_set(_1:dict, coverage_data:dict, layout:[dict]) -> bool:
     return coverage_data['~results']['~compute_covering_set'][layout[0]] != []
 
 def number_of_covering_sets(_1:dict, coverage_data:dict, layout:[dict]) -> int:
-    covering_sets:list = coverage_data['~results']['~compute_covering_set'][layout[0]]
-    return len(covering_sets)
+    return len(coverage_data['~results']['~compute_covering_set'][layout[0]])
+
+def count_covering_set_units(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> Tuple[str, List[dict]]:
+    css:List[Tuple[str, List[dict]]] = coverage_data['~results']['~compute_covering_set'][keeb[0]]
+    return list(map(lambda cs: (reduce(add, map(lambda s: get_total_units(s), cs), 0.0), cs), css))
 
 def covering_set_of_lowest_units(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> Tuple[str, List[dict]]:
-    css:List[Tuple[str, List[dict]]] = coverage_data['~results']['~compute_covering_set'][keeb[0]]
-    return min(map(lambda cs: (reduce(add, map(lambda s: get_total_units(s), cs), 0.0), cs), css), key=fst)
+    csus:List[Tuple[str, List[dict]]] = coverage_data['~results']['~count_covering_set_units'][keeb[0]]
+    return min(csus, key=fst)
 
 def covering_set_of_lowest_units_surplus(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
     cs:Tuple[float, List[Tuple[str, List[dict]]]] = coverage_data['~results']['~covering_set_of_lowest_units'][keeb[0]]
-    return cs[0] - get_total_units(keeb)
+    return (cs[0] - get_total_units(keeb), list(map(fst, cs[1])))
 
-def covering_set_of_lowest_units_value(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> [str]:
-    return list(map(fst, coverage_data['~results']['~covering_set_of_lowest_units'][keeb[0]][1]))
+def covering_set_of_lowest_units_surplus_amount(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> [str]:
+    return coverage_data['~results']['~covering_set_of_lowest_units_surplus'][keeb[0]][0]
+
+def covering_set_of_lowest_units_surplus_value(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> [str]:
+    return coverage_data['~results']['~covering_set_of_lowest_units_surplus'][keeb[0]][1]
+
+def covering_set_cardinalities(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
+    css:List[Tuple[str, List[dict]]] = coverage_data['~results']['~compute_covering_set'][keeb[0]]
+    return list(map(lambda cs: (len(cs), cs), css))
 
 def covering_set_of_lowest_cardinality(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
-    css:List[Tuple[str, List[dict]]] = coverage_data['~results']['~compute_covering_set'][keeb[0]]
-    return min(map(lambda cs: (len(cs), cs), css), key=fst)
+    return min(coverage_data['~results']['~covering_set_cardinalities'][keeb[0]], key=fst)
 
 def covering_set_of_lowest_cardinality_amount(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
-    cs:Tuple[float, List[Tuple[str, List[dict]]]] = coverage_data['~results']['~covering_set_of_lowest_cardinality'][keeb[0]]
-    return cs[0]
+    return coverage_data['~results']['~covering_set_of_lowest_cardinality'][keeb[0]][0]
 
 def covering_set_of_lowest_cardinality_value(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> [str]:
     return list(map(fst, coverage_data['~results']['~covering_set_of_lowest_cardinality'][keeb[0]][1]))
+
+def most_cumbersome_keyboard(_1:Namespace, coverage_data:dict, _2:[dict], _3:[dict]) -> str:
+    mck:Tuple[int, str] = max(map(lambda p: (p[1][0], p[0]), coverage_data['~results']['~covering_set_of_lowest_cardinality'].items()), key=fst)
+    return '%s (%d)' %(mck[1], mck[0])
+
+def most_wasteful_keyboard(_1:Namespace, coverage_data:dict, _2:[dict], _3:[dict]) -> str:
+    mwk:Tuple[int, str] = max(map(lambda p: (p[1][0], p[0]), coverage_data['~results']['~covering_set_of_lowest_units_surplus'].items()), key=fst)
+    return '%s (%.2f)' %(mwk[1], mwk[0])
+
+def least_used_kit(_1:Namespace, coverage_data:dict, keebs:[dict], kits:[dict]) -> str:
+    keeb_names:[str] = list(map(fst, keebs))
+    keebs_with_non_disjoint_kits:List[str, List[Tuple[str, [dict]]]] = list(map(lambda p: (p[0], reduce(concat, map(lambda cs: list(map(fst, cs)), p[1]), [])), filter(lambda p: p[0] in keeb_names, coverage_data['~results']['~compute_covering_set'].items())))
+
+    occurrences:dict = { kit: [] for kit,_ in kits }
+    for keeb,non_disjoint_kits in keebs_with_non_disjoint_kits:
+        for kit in non_disjoint_kits:
+            occurrences[kit] += [keeb]
+
+    counted_occurrences:List[Tuple[str, int]] = list(map(lambda p: (p[0], len(p[1])), occurrences.items()))
+    luk:Tuple[str, int] = min(counted_occurrences, key=snd)
+
+    return '%s (%d)' % luk

@@ -19,6 +19,9 @@ def flatten(obj:object) -> [object]:
     else:
         return [obj]
 
+def concat(a:list, b:list) -> list:
+    return a + b
+
 def iconcat(a:list, b:list) -> list:
     a.extend(b)
     return a
