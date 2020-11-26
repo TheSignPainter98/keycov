@@ -78,6 +78,7 @@ def _format_field(pargs:Namespace, known_paths:[str], val:object) -> str:
         str: lambda s: format_str(pargs, known_paths, s),
         bool: lambda b: apply_formatting(pargs, formats.tick_format, '✓') if b else apply_formatting(pargs, formats.cross_format, '✗'),
         list: lambda l: format_list(pargs, known_paths, l),
+        dict: lambda d: format_list(pargs, known_paths, map(lambda p: '%s=%s' % p, d.items())),
         type(None): lambda _: apply_formatting(pargs, formats.none_format, formats.none_string)
     }
     return convs[type(val)](val)
