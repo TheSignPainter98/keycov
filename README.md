@@ -14,7 +14,7 @@ What we have, therefore, is a fundamentally-human problem which contains parts w
 Therefore, I wrote this script to give the keycap designer a hand by analysing their kitting choices in response to a set of keyboard layouts to cover.
 These characteristics should help give an idea of how kitting will be perceived and used by (rational) potential customers.
 
-Hopefully this should give the designer some peace-of-mind in their existing decisions and hence the path to novel and creative kitting solutions, well-tailored to their set should be somewhat easier.
+KeyCov can’t kit, but it can give the designer some peace-of-mind in their existing decisions and hence smoothen the path to novel and creative kitting solutions, well-tailored to their set.
 
 ![An example of keycov output](https://raw.githubusercontent.com/TheSignPainter98/keycov/master/img/keycov-example.png)
 
