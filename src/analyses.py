@@ -175,6 +175,41 @@ analyses:[dict] = [
             '~compute_covering_set',
         ]
     },
+    {
+        'name': 'smallest_covering_kit_set_is_minimal_surplus_covering_kit_set',
+        'pretty-name': 'Smallest-kit covering set is smallest unit covering set',
+        'description': 'The covering set of kits for a keyboard which has the fewest total units also contains the fewest necessary kits',
+        'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
+        'verbosity': 2,
+        'requires': [
+            '~covering_set_of_lowest_cardinality',
+            '~covering_set_of_lowest_units',
+        ]
+    },
+    {
+        'name': 'all_keyboards_have_smallest_covering_kit_set_is_minimal_surplus_covering_kit_set',
+        'pretty-name': 'Optimal units per kit',
+        'description': 'Checks whether for each keyboard, the set of kits which covers it with the least surplus units, is also the smallest set of kits which covers it. Note that this checks for a locally optimal solution, whether the solution is the global optimum---more efficient kitting may still be possible but will require some re-arrangement.',
+        'requires': [
+            'smallest_covering_kit_set_is_minimal_surplus_covering_kit_set'
+        ]
+    },
+    {
+        'name': 'all_kits_covered',
+        'pretty-name': 'All kits covered',
+        'description': 'Checks whether every key in every kit is a part of some keyboard (and so not useless)',
+        'requires': [
+            'exists_covering_set',
+        ]
+    },
+    {
+        'name': 'all_keebs_covered',
+        'pretty-name': 'All keyboards covered',
+        'description': 'Checks whether every key in every keyboard is a part of some kit (and so not missing)',
+        'requires': [
+            'exists_covering_set',
+        ]
+    },
 ]
 
 def num_keebs(_1:Namespace, _2:dict, target_layouts:[dict], _3:[dict]) -> int:
@@ -229,6 +264,14 @@ def compute_covering_set(pargs:Namespace, _:dict, keeb:Tuple[str, List[dict]], k
 def exists_covering_set(_1:dict, coverage_data:dict, layout:[dict]) -> bool:
     return coverage_data['~results']['~compute_covering_set'][layout[0]] != []
 
+def all_keebs_covered(_1:dict, coverage_data:dict, keebs:List[Tuple[str, List[dict]]], _2:List[Tuple[str, List[dict]]]) -> bool:
+    keeb_names:list = list(map(fst, keebs))
+    return all(map(snd, filter(lambda p: p[0] in keeb_names, coverage_data['~results']['exists_covering_set'].items())))
+
+def all_kits_covered(_1:dict, coverage_data:dict, _2:List[Tuple[str, List[dict]]], kits:List[Tuple[str, List[dict]]]) -> bool:
+    kit_names:list = list(map(fst, kits))
+    return all(map(snd, filter(lambda p: p[0] in kit_names, coverage_data['~results']['exists_covering_set'].items())))
+
 def number_of_covering_sets(_1:dict, coverage_data:dict, layout:[dict]) -> int:
     return len(coverage_data['~results']['~compute_covering_set'][layout[0]])
 
@@ -262,6 +305,14 @@ def covering_set_of_lowest_cardinality_amount(_1:Namespace, coverage_data:dict, 
 
 def covering_set_of_lowest_cardinality_value(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> [str]:
     return list(map(fst, coverage_data['~results']['~covering_set_of_lowest_cardinality'][keeb[0]][1]))
+
+def smallest_covering_kit_set_is_minimal_surplus_covering_kit_set(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> bool:
+    smallest_covering_set:Set[Tuple[str, [dict]]] = set(map(fst, coverage_data['~results']['~covering_set_of_lowest_cardinality'][keeb[0]][1]))
+    minimal_surplus_covering_set:Set[Tuple[str, [dict]]] = set(map(fst, coverage_data['~results']['~covering_set_of_lowest_units'][keeb[0]][1]))
+    return smallest_covering_set == minimal_surplus_covering_set
+
+def all_keyboards_have_smallest_covering_kit_set_is_minimal_surplus_covering_kit_set(_1:Namespace, coverage_data:dict, _2:[dict], _3:[dict]) -> bool:
+    return all(coverage_data['~results']['smallest_covering_kit_set_is_minimal_surplus_covering_kit_set'].values())
 
 def most_cumbersome_keyboard(_1:Namespace, coverage_data:dict, _2:[dict], _3:[dict]) -> str:
     mck:Tuple[int, str] = max(map(lambda p: (p[1][0], p[0]), coverage_data['~results']['~covering_set_of_lowest_cardinality'].items()), key=fst)
