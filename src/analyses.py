@@ -19,6 +19,11 @@ class AnalysisTypes:
     ITERATE_KITS:int = 0x10
     ITERATE_KEEBS:int = 0x20
 
+class FailedAnalysisResult:
+    result:object
+    def __init__(self, result):
+        self.result = result
+
 analyses:[dict] = [
     {
         'name': 'num_keebs',
@@ -216,7 +221,10 @@ def get_units(key:dict) -> float:
     return max(considered_dims)
 
 def compute_covering_set(pargs:Namespace, _:dict, keeb:Tuple[str, List[dict]], kits:List[Tuple[str, List[dict]]]) -> List[Tuple[str, List[dict]]]:
-    return get_covering_sets(keeb, kits)
+    covering_sets:List[Tuple[str, List[dict]]] = get_covering_sets(keeb, kits)
+    if not covering_sets:
+        return FailedAnalysisResult(covering_sets)
+    return covering_sets
 
 def exists_covering_set(_1:dict, coverage_data:dict, layout:[dict]) -> bool:
     return coverage_data['~results']['~compute_covering_set'][layout[0]] != []

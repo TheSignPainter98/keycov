@@ -1,5 +1,5 @@
 import src.analyses as analyses_mod
-from .analyses import analyses, AnalysisFailedError, AnalysisTypes, DEFAULT_VERBOSITY
+from .analyses import analyses, AnalysisFailedError, AnalysisTypes, DEFAULT_VERBOSITY, FailedAnalysisResult
 from .args import Namespace
 from .coverage_analyser import get_covering_sets
 from .util import dict_union, fst, iconcat, snd
@@ -32,6 +32,9 @@ def run_analyses(pargs:Namespace, keeb_layouts:[[dict]], kit_layouts:[[dict]]) -
             except AnalysisFailedError as afe:
                 print(afe.message, file=stderr)
                 exit_code |= analysis['exit-code']
+            if type(ret) == FailedAnalysisResult:
+                exit_code |= analysis['exit-code']
+                ret = ret.result
             if pargs.analysis_verbosity >= analysis['verbosity']:
                 coverage_data['global-results'][analysis['pretty-name']] = ret
             coverage_data['~results'][analysis['name']] = ret
@@ -62,6 +65,9 @@ def handle_analysis_on_individuals(pargs:Namespace, analysis:dict, func:Callable
             except AnalysisFailedError as afe:
                 print(afe.message, file=stderr)
                 exit_code = analysis['exit-code']
+            if type(ret) == FailedAnalysisResult:
+                exit_code |= analysis['exit-code']
+                ret = ret.result
         if pargs.analysis_verbosity >= analysis['verbosity']:
             coverage_data[output_key][const_layout[0]][analysis['pretty-name']] = ret
         coverage_data['~results'][analysis['name']][const_layout[0]] = ret
@@ -77,6 +83,9 @@ def handle_analysis_iteration(pargs:Namespace, analysis:dict, func:Callable, cov
             except AnalysisFailedError as afe:
                 print(afe.message, file=stderr)
                 exit_code = analysis['exit-code']
+            if type(ret) == FailedAnalysisResult:
+                exit_code |= analysis['exit-code']
+                ret = ret.result
         if pargs.analysis_verbosity >= analysis['verbosity']:
             coverage_data[output_key][iter_layout[0]][analysis['pretty-name']] = ret
         coverage_data['~results'][analysis['name']][iter_layout[0]] = ret
