@@ -77,8 +77,10 @@ def _format_field(pargs:Namespace, known_paths:[str], val:object) -> str:
         float: lambda f: apply_formatting(pargs, formats.num_format, '%%.%df' % float_output_precision % f),
         str: lambda s: format_str(pargs, known_paths, s),
         bool: lambda b: apply_formatting(pargs, formats.tick_format, '✓') if b else apply_formatting(pargs, formats.cross_format, '✗'),
+        set: lambda s: apply_formatting(pargs, formats.empty_set_format, formats.empty_set_string) if len(s) == 0 else '{ %s }' % format_list(pargs, known_paths, s),
+        tuple: lambda t: format_list(pargs, known_paths, t),
         list: lambda l: format_list(pargs, known_paths, l),
-        dict: lambda d: format_list(pargs, known_paths, map(lambda p: '%s=%s' % p, d.items())),
+        dict: lambda d: format_list(pargs, known_paths, list(map(lambda p: '%s=%s' % p, d.items()))),
         type(None): lambda _: apply_formatting(pargs, formats.none_format, formats.none_string)
     }
     return convs[type(val)](val)
@@ -96,7 +98,7 @@ def format_str(pargs:Namespace, known_paths:[str], s:str) -> str:
 
 def format_list(pargs:Namespace, known_paths:[str], l:list) -> str:
     if l == []:
-        return apply_formatting(pargs, EMPTY_LIST_FORMAT, EMPTY_LIST_STRING)
+        return apply_formatting(pargs, formats.empty_list_format, formats.empty_list_string)
     return ', '.join(list(map(lambda v: _format_field(pargs, known_paths, v), l)))
 
 def apply_formatting(pargs:Namespace, formatting:int, s:str) -> str:
