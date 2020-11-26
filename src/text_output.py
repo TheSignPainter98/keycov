@@ -29,17 +29,17 @@ END_CODE:int = '\033[0m'
 
 keycap_pretty_name_regex:str = r'^[^ \n]*[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}(\[[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}\])?(-[%s]+)?$' % ''.join(special_properties.keys())
 
-def output_as_text(pargs:Namespace, coverage_data:dict) -> str:
+def output_as_text(pargs:Namespace, known_paths:[str], coverage_data:dict) -> str:
     global formats, terminal_formats
     theme:dict = read_yaml(pargs.theme)
     terminal_formats = theme['terminal_formats']
     formats = SimpleNamespace(**dict_union(default_formats, theme['formats']))
-    return (linesep * 2).join(list(filter(lambda c: c, map(lambda p: format_category(pargs, p), sorted(coverage_data.items(), key=fst)))))
+    return (linesep * 2).join(list(filter(lambda c: c, map(lambda p: format_category(pargs, known_paths, p), sorted(coverage_data.items(), key=fst)))))
 
-def format_category(pargs, coverage_data:tuple) -> str:
-    return linesep.join([coverage_data[0] + ':', make_table(pargs, coverage_data[1])])
+def format_category(pargs, known_paths:[str], coverage_data:tuple) -> str:
+    return linesep.join([coverage_data[0] + ':', make_table(pargs, known_paths, coverage_data[1])])
 
-def make_table(pargs:Namespace, table_data:[dict]) -> str:
+def make_table(pargs:Namespace, known_paths:[str], table_data:[dict]) -> str:
     if table_data == []:
         return ''
 
@@ -52,7 +52,7 @@ def make_table(pargs:Namespace, table_data:[dict]) -> str:
     table.columns.header = list(map(lambda c: apply_formatting(pargs, formats.header_format, c), col_names))
 
     # Add table body content
-    body:[[object]] = list(map(lambda r: list(map(lambda f: _format_field(pargs, f[1]), r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data)))
+    body:[[object]] = list(map(lambda r: list(map(lambda f: _format_field(pargs, known_paths, f[1]), r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data)))
     for record in body:
         table.rows.append(record)
 
@@ -71,32 +71,32 @@ def make_table(pargs:Namespace, table_data:[dict]) -> str:
 
     return str(table)
 
-def _format_field(pargs:Namespace, val:object) -> str:
+def _format_field(pargs:Namespace, known_paths:[str], val:object) -> str:
     convs:dict = {
         int: lambda i: apply_formatting(pargs, formats.num_format, str(i)),
         float: lambda f: apply_formatting(pargs, formats.num_format, '%%.%df' % float_output_precision % f),
-        str: lambda s: format_str(pargs, s),
+        str: lambda s: format_str(pargs, known_paths, s),
         bool: lambda b: apply_formatting(pargs, formats.tick_format, '✓') if b else apply_formatting(pargs, formats.cross_format, '✗'),
-        list: lambda l: format_list(pargs, l),
+        list: lambda l: format_list(pargs, known_paths, l),
         type(None): lambda _: apply_formatting(pargs, formats.none_format, formats.none_string)
     }
     return convs[type(val)](val)
 
-def format_str(pargs:Namespace, s:str) -> str:
+def format_str(pargs:Namespace, known_paths:[str], s:str) -> str:
     if not s:
         return apply_formatting(pargs, formats.empty_string_format, formats.empty_string_string)
-    def format_word(pargs:Namespace, s:str) -> str:
-        if (pargs.input_dir and s.startswith(pargs.input_dir)) or (pargs.target_dir and s.startswith(pargs.target_dir)) or s[-4:] in ['.json', '.yml', '.yaml'] or s.endswith(sep):
+    def format_word(pargs:Namespace, known_paths:[str], s:str) -> str:
+        if s in known_paths or (pargs.input_dir and s.startswith(pargs.input_dir)) or (pargs.target_dir and s.startswith(pargs.target_dir)) or s[-4:] in ['.json', '.yml', '.yaml'] or s.endswith(sep):
             return apply_formatting(pargs, formats.path_format, s)
         if match(keycap_pretty_name_regex, s) is not None:
             return apply_formatting(pargs, formats.keycap_name_format, s)
         return s
-    return ' '.join(list(map(lambda w: format_word(pargs, w), s.split())))
+    return ' '.join(list(map(lambda w: format_word(pargs, known_paths, w), s.split())))
 
-def format_list(pargs:Namespace, l:list) -> str:
+def format_list(pargs:Namespace, known_paths:[str], l:list) -> str:
     if l == []:
         return apply_formatting(pargs, EMPTY_LIST_FORMAT, EMPTY_LIST_STRING)
-    return ', '.join(list(map(lambda v: _format_field(pargs, v), l)))
+    return ', '.join(list(map(lambda v: _format_field(pargs, known_paths, v), l)))
 
 def apply_formatting(pargs:Namespace, formatting:int, s:str) -> str:
     if not use_colour(pargs):
