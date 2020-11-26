@@ -315,11 +315,18 @@ def all_keyboards_have_smallest_covering_kit_set_is_minimal_surplus_covering_kit
     return all(coverage_data['~results']['smallest_covering_kit_set_is_minimal_surplus_covering_kit_set'].values())
 
 def most_cumbersome_keyboard(_1:Namespace, coverage_data:dict, _2:[dict], _3:[dict]) -> str:
-    mck:Tuple[int, str] = max(map(lambda p: (p[1][0], p[0]), coverage_data['~results']['~covering_set_of_lowest_cardinality'].items()), key=fst)
+    lowest_cardinality_covering_sets:List[Tuple[int, str]] = list(map(lambda p: (p[1][0], p[0]), coverage_data['~results']['~covering_set_of_lowest_cardinality'].items()))
+    if lowest_cardinality_covering_sets == []:
+        return None
+    mck:Tuple[int, str] = max(lowest_cardinality_covering_sets, key=fst)
     return '%s (%d)' %(mck[1], mck[0])
 
 def most_wasteful_keyboard(_1:Namespace, coverage_data:dict, _2:[dict], _3:[dict]) -> str:
-    mwk:Tuple[int, str] = max(map(lambda p: (p[1][0], p[0]), coverage_data['~results']['~covering_set_of_lowest_units_surplus'].items()), key=fst)
+    # TODO: check mwk is fine
+    lowest_units_covering_sets:List[Tuple[float, str]] = list(map(lambda p: (p[1][0], p[0]), coverage_data['~results']['~covering_set_of_lowest_units_surplus'].items()))
+    if lowest_units_covering_sets == []:
+        return None
+    mwk:Tuple[int, str] = max(lowest_units_covering_sets, key=fst)
     return '%s (%.2f)' %(mwk[1], mwk[0])
 
 def least_used_kit(_1:Namespace, coverage_data:dict, keebs:[dict], kits:[dict]) -> str:
@@ -332,6 +339,8 @@ def least_used_kit(_1:Namespace, coverage_data:dict, keebs:[dict], kits:[dict]) 
             occurrences[kit] += [keeb]
 
     counted_occurrences:List[Tuple[str, int]] = list(map(lambda p: (p[0], len(p[1])), occurrences.items()))
+    if counted_occurrences == []:
+        return None
     luk:Tuple[str, int] = min(counted_occurrences, key=snd)
 
     return '%s (%d)' % luk

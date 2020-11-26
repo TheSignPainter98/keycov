@@ -111,7 +111,7 @@ def sanitise(coverage_data:Union[dict, List[dict]]) -> dict:
     # Remove local data if no analyses are to be printed
     local_result_keys:[str] = ['local-keeb-results', 'local-kit-results']
     for local_result_key in local_result_keys:
-        if list(coverage_data[local_result_key].items())[0][1] == {}:
+        if coverage_data[local_result_key] == {} or list(coverage_data[local_result_key].items())[0][1] == {}:
             coverage_data[local_result_key] = {}
 
     # Make the results table-friendly
