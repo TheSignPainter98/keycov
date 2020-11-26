@@ -6,8 +6,8 @@ from .version import version_notice
 from argparse import ArgumentParser, Namespace
 from beautifultable import ALIGN_LEFT, BeautifulTable
 from functools import reduce
-from os import linesep
-from os.path import normpath, sep
+from os import getcwd, linesep
+from os.path import dirname, join, normpath, relpath, sep
 from shutil import get_terminal_size
 from sys import exit, stderr
 from typing import Callable
@@ -15,7 +15,7 @@ from typing import Callable
 description:str = 'A little script for helping keycap designers analyse kitting coverage'
 
 dir_str:Callable = lambda s: normpath(s) + sep
-
+rel_path:Callable = lambda p: relpath(join(dirname(__file__), '..', p), start=getcwd())
 
 args:[dict] = [
     {
@@ -54,7 +54,7 @@ args:[dict] = [
         'type': str,
         'sanitiser': dir_str,
         'metavar': 'dir',
-        'default': 'kits'
+        'default': rel_path('kits')
     },
     {
         'dest': 'target_dir',
@@ -65,7 +65,7 @@ args:[dict] = [
         'type': str,
         'sanitiser': dir_str,
         'metavar': 'dir',
-        'default': 'keebs'
+        'default': rel_path('keebs')
     },
     {
         'dest': 'output_format',
@@ -136,7 +136,7 @@ args:[dict] = [
         'metavar': 'theme',
         'help': 'Set the colour theme for the text output tables',
         'type': str,
-        'default': 'themes/default.yml'
+        'default': rel_path('themes/default.yml')
     }
 ]
 arg_dict:dict = { a['dest']: a for a in args if 'dest' in a }
