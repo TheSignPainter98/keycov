@@ -2,6 +2,7 @@
 
 from .analyses import analyses, DEFAULT_VERBOSITY
 from .util import default_terminal_dims, dict_union, dict_union_ignore_none, repeat, restrict_dict
+from .version import version_notice
 from argparse import ArgumentParser, Namespace
 from beautifultable import ALIGN_LEFT, BeautifulTable
 from functools import reduce
@@ -17,6 +18,15 @@ dir_str:Callable = lambda s: normpath(s) + sep
 
 
 args:[dict] = [
+    {
+        'dest': 'show_version',
+        'short': '-V',
+        'long': '--version',
+        'action': 'store_true',
+        'help': 'Show the current version and exit',
+        'type': bool,
+        'default': False
+    },
     {
         'dest': 'show_help',
         'short': '-h',
@@ -178,6 +188,10 @@ def parse_args(iargs: tuple) -> Namespace:
         ap.print_help()
         print(get_long_help())
         exit(0)
+    elif npargs.show_version:
+        print(version_notice)
+        exit(0)
+
 
     return npargs
 
