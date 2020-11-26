@@ -1,16 +1,20 @@
 # KeyCov
 
-Kitting is hard.
-Making sure that your kitting makes sense requires three things:
+Designing good, original kitting is a surprisingly difficult problem.
+In particular, we require that:
 
-1. Coverage of common keyboard types
-2. Kits to be offered at a reasonable price and hence do not contain too many units
-3. Kitting divisions to make sense to fellow humans
+1. Common keyboards are covered
+2. Individual kits are reasonably small so they may be offered relatively cheaply
+3. A particular customer should not be expected to require too many kits
+4. The overall number of kits is not absurdly high
+5. The assignment of keys into kits makes sense to fellow humans.
 
-These constraints describe a fundamentally-human task containing a significant arduous part and which hence reduces its affinity with being solved by people.
+What we have, therefore, is a fundamentally-human problem which contains parts which require a large amount of repetitive work.
 
-In response, I wrote this script to give the keycap designer a hand by computing and summarising characteristics of their kitting in response to a set of keyboard layouts to cover.
-Hopefully, this should make the task a little less painless, and lead to even better and more creative solutions expressly tailored to each set.
+Therefore, I wrote this script to give the keycap designer a hand by analysing their kitting choices in response to a set of keyboard layouts to cover.
+These characteristics should help give an idea of how kitting will be perceived and used by (rational) potential customers.
+
+Hopefully this should give the designer some peace-of-mind in their existing decisions and hence the path to novel and creative kitting solutions, well-tailored to their set should be somewhat easier.
 
 ![An example of keycov output](https://raw.githubusercontent.com/TheSignPainter98/keycov/master/img/keycov-example.png)
 
@@ -63,21 +67,22 @@ Before running, KeyCov will require two things:
 2. A folder containing the kits the user proposes for their set (in [KLE][kle] format)
    By default this the `kits/` directory next to `keycov.py`.
 
-To run KeyCov, open a terminal and type the following (assuming that the [latest release][latest-release] was unzipped to `~/Downloads/keycov/`.
+To run KeyCov, open a terminal and type the following (assuming that the [latest release][latest-release] was unzipped to `~/Downloads/keycov/`).
 
 ```bash
 cd ~/Downloads/keycov/
 python3 keycov.py
 ```
 
-This will output a basic set of analyses, as it has defaulted to verbosity level 1.
+This will output a basic set of analyses; KeyCov defaults to verbosity level 1.
 For more information, pass a higher verbosity number by running something like `python3 keycov.py --analysis-verbosity=3`
 Details on the analyses performed and the verbosity levels required to output them are shown by passing KeyCov the `--long-help` flag.
 
-Separate output formats are provided to allow KeyCov to interface with a more customer-friendly front-end (e.g a keycap set website).
+Aside from text, KeyCov supports `json` and `yaml` output formats to allow an interface with a more customer-friendly front-end (e.g a keycap set website).
 
 ## Contributing
 
+Contributions are welcome!
 If you’d like to contribute, please abide by the [code of conduct.][code-of-conduct]
 
 ## Author and Random Notes
