@@ -8,6 +8,7 @@ from re import match
 from shutil import get_terminal_size
 from sys import platform, stdout
 from types import SimpleNamespace
+from typing import List, Union
 
 terminal_formats:dict = {}
 formats:SimpleNamespace = None
@@ -31,9 +32,16 @@ keycap_pretty_name_regex:str = r'^[^ \n]*[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}(\[[0-
 
 def output_as_text(pargs:Namespace, known_paths:[str], coverage_data:dict) -> str:
     global formats, terminal_formats
+
+    # Resolve the theme
     theme:dict = read_yaml(pargs.theme)
     terminal_formats = theme['terminal_formats']
     formats = SimpleNamespace(**dict_union(default_formats, theme['formats']))
+
+    # Remove data not to be printed
+    remove_private_data(coverage_data)
+
+    # Format and return
     return (linesep * 2).join(list(filter(lambda c: c, map(lambda p: format_category(pargs, known_paths, p), sorted(coverage_data.items(), key=fst)))))
 
 def format_category(pargs, known_paths:[str], coverage_data:tuple) -> str:
@@ -129,3 +137,17 @@ def use_colour(pargs:Namespace, file=stdout) -> bool:
     if pargs.force_no_colour:
         return False
     return supported_platform and is_a_tty
+
+def remove_private_data(cdata:Union[dict, List[dict]]) -> dict:
+    if type(cdata) == dict:
+        keys_to_remove:[str] = []
+        for key in cdata:
+            if type(key) == str and key.startswith('~'):
+                keys_to_remove.append(key)
+        for rkey in keys_to_remove:
+            del cdata[rkey]
+        for key in cdata:
+            cdata[key] = remove_private_data(cdata[key])
+    elif type(cdata) in [list, tuple]:
+        cdata = list(map(remove_private_data, cdata))
+    return cdata

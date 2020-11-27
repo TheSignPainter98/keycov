@@ -92,22 +92,6 @@ def handle_analysis_iteration(pargs:Namespace, analysis:dict, func:Callable, cov
     return exit_code
 
 def sanitise(coverage_data:Union[dict, List[dict]]) -> dict:
-    def remove_private_data(cdata:Union[dict, List[dict]]) -> dict:
-        if type(cdata) == dict:
-            keys_to_remove:[str] = []
-            for key in cdata:
-                if type(key) == str and key.startswith('~'):
-                    keys_to_remove.append(key)
-            for rkey in keys_to_remove:
-                del cdata[rkey]
-            for key in cdata:
-                cdata[key] = remove_private_data(cdata[key])
-        elif type(cdata) in [list, tuple]:
-            cdata = list(map(remove_private_data, cdata))
-        return cdata
-
-    remove_private_data(coverage_data)
-
     # Remove local data if no analyses are to be printed
     local_result_keys:[str] = ['local-keeb-results', 'local-kit-results']
     for local_result_key in local_result_keys:
@@ -124,7 +108,7 @@ def sanitise(coverage_data:Union[dict, List[dict]]) -> dict:
         'local-keeb-results': 'Keyboard-specific analysis',
         'local-kit-results': 'Kit-specific analysis',
     }
-    renamed_coverage_data:dict = dict(map(lambda p: (key_map[p[0]], p[1]), coverage_data.items()))
+    renamed_coverage_data:dict = dict(map(lambda p: (key_map[p[0]] if p[0] in key_map else p[0], p[1]), coverage_data.items()))
 
     return renamed_coverage_data
 
