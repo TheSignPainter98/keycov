@@ -38,19 +38,19 @@ analyses:[dict] = [
     {
         'name': 'most_common_kit_keys',
         'pretty-name': 'Most common keys in kits',
-        'description': 'Finds out the 10 keys which are the most common in the kits presented',
+        'description': 'The keys which are the most common in the kits presented',
         'verbosity': 2
     },
     {
         'name': 'most_common_keeb_keys',
         'pretty-name': 'Most common keys in keyboards',
-        'description': 'Finds out the 10 keys which are the most common in the target keyboard layouts presented',
+        'description': 'The keys which are the most common in the keyboards presented',
         'verbosity': 2
     },
     {
         'name': 'count_units',
         'pretty-name': 'Total units',
-        'description': 'Computes the total number of units present in a given layout',
+        'description': 'The total number of units present in a given layout',
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KITS | AnalysisTypes.INDIVIDUAL_KEEBS
     },
     {
@@ -60,7 +60,7 @@ analyses:[dict] = [
     {
         'name': 'exists_covering_set',
         'pretty-name': 'Is covered',
-        'description': 'Describes for a keeb whether there exists a covering set of kits, or vice versa',
+        'description': 'For a keeb whether there exists a covering set of kits, or vice versa',
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KITS | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
             '~compute_covering_set'
@@ -99,7 +99,7 @@ analyses:[dict] = [
     {
         'name': 'covering_set_of_lowest_units_surplus_amount',
         'pretty-name': 'Minimal-unit covering sets surplus',
-        'description': 'Shows the least amount of surplus units (waste plastic) required by any set of kits which covers a particular keyboard',
+        'description': 'The least amount of surplus units (waste keycap material) required by any set of kits which covers a particular keyboard',
         'verbosity': 1,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.INDIVIDUAL_KEEBS,
         'requires': [
@@ -161,7 +161,7 @@ analyses:[dict] = [
     {
         'name': 'most_wasteful_keyboard',
         'pretty-name': 'Keyboard with most surplus units to cover',
-        'description': 'The keyboard which requires the most wasted units of plastic to cover',
+        'description': 'The keyboard which requires the most wasted units of plastic to cover it',
         'requires': [
             '~covering_set_of_lowest_units'
         ]
@@ -169,7 +169,7 @@ analyses:[dict] = [
     {
         'name': 'least_used_kit',
         'pretty-name': 'Least-required kit',
-        'description': 'The kit which is required in the fewest setups',
+        'description': 'The kit which is required in by fewest keyboards',
         'verbosity': 2,
         'requires': [
             '~compute_covering_set',
@@ -189,7 +189,7 @@ analyses:[dict] = [
     {
         'name': 'all_keyboards_have_smallest_covering_kit_set_is_minimal_surplus_covering_kit_set',
         'pretty-name': 'Optimal units per kit',
-        'description': 'Checks whether for each keyboard, the set of kits which covers it with the least surplus units, is also the smallest set of kits which covers it. Note that this checks for a locally optimal solution, whether the solution is the global optimum---more efficient kitting may still be possible but will require some re-arrangement.',
+        'description': 'Whether for each keyboard, the set of kits which covers it with the least surplus units, is also the smallest set of kits which covers it. Note that this checks for a locally optimal solution and NOT whether the solution is globally optimal. Even if the analysis returns "true," more efficient kitting may still be possible but will require some re-arrangement.',
         'requires': [
             'smallest_covering_kit_set_is_minimal_surplus_covering_kit_set'
         ]
@@ -197,7 +197,7 @@ analyses:[dict] = [
     {
         'name': 'all_kits_covered',
         'pretty-name': 'All kits covered',
-        'description': 'Checks whether every key in every kit is a part of some keyboard (and so not useless)',
+        'description': 'Whether every key in every kit is a part of some keyboard (and so not useless)',
         'requires': [
             'exists_covering_set',
         ]
@@ -205,7 +205,7 @@ analyses:[dict] = [
     {
         'name': 'all_keebs_covered',
         'pretty-name': 'All keyboards covered',
-        'description': 'Checks whether every key in every keyboard is a part of some kit (and so not missing)',
+        'description': 'Whether every key in every keyboard is a part of some kit (and so not missing)',
         'requires': [
             'exists_covering_set',
         ]

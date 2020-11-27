@@ -225,7 +225,7 @@ def arg_inf(arg:dict) -> str:
 def get_long_help() -> str:
     table:BeautifulTable = BeautifulTable()
     #  Add the data
-    for r in list(map(lambda a: [a['pretty-name'], a['description'] + ' (verbosity: %d)' %(a['verbosity'] if 'verbosity' in a else DEFAULT_VERBOSITY)], filter(lambda a: 'pretty-name' in a and not a['name'].startswith('~'), analyses))):
+    for r in list(map(lambda a: [a['pretty-name'], a['description'] + ' (verbosity-level: %d)' %(a['verbosity'] if 'verbosity' in a else DEFAULT_VERBOSITY)], filter(lambda a: 'pretty-name' in a and not a['name'].startswith('~'), analyses))):
         table.rows.append(r)
 
     # Apply styling
