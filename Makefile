@@ -33,7 +33,7 @@ src/version.py: src/version.py.in
 %.py: ;
 
 requirements.txt: $(KEYCOV_RAW_SRCS)
-	pipreqs --force --print >requirements.txt 2>/dev/null
+	pipreqs --force --print >requirements.txt
 
 clean:
 	$(RM) -r requirements.txt src/version.py keycov.zip __pycache__/
