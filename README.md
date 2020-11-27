@@ -80,6 +80,7 @@ For more information, pass a higher verbosity number by running something like `
 Details on the analyses performed and the verbosity levels required to output them are shown by passing KeyCov the `--long-help` flag.
 
 Aside from text, KeyCov supports `json` and `yaml` output formats to allow an interface with a more customer-friendly front-end (e.g a keycap set website).
+There is also a python API which can be accessed through the `keycov` function in [`src.keycov_main`][src-keycov_main] which takes a dictionaries with keys specified by the `dest` field in entry in [`src.args.args`][src-args-args].
 
 ## Building from the Source
 
@@ -137,3 +138,5 @@ More specifically, it reduces to [set cover,][set-cover] a standard problem in t
 [prime-sets]: https://github.com/TheSignPainter98/keycov/blob/master/src/coverage_analyser.py#L8
 [python3]: https://www.python.org
 [set-cover]: https://www.geeksforgeeks.org/set-cover-problem-set-1-greedy-approximate-algorithm/
+[src-args-args]
+[src-keycov_main]

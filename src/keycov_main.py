@@ -1,32 +1,23 @@
-from .args import Namespace, parse_args
+from .args import args, Namespace, parse_args
 from .text_output import output_as_text
 from .analysis_runner import run_analyses
 from .parse_kle import parse_kle
 from .path import get_json_and_yaml_files
-from .util import key_pretty_name, serialise_key
+from .util import dict_union, key_pretty_name, serialise_key
 from json import dumps as jdump
 from os import linesep
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from yaml import dump as ydump
 
 def main(args:[str]) -> int:
     # Parse arguments
     pargs:Namespace = parse_args(args)
 
-    # Collect input data
-    input_layout_files:[str] = get_json_and_yaml_files(pargs.input_dir)
-    target_layout_files:[str] = get_json_and_yaml_files(pargs.target_dir)
-    input_layouts:[[dict]] = list(map(parse_named_kle, input_layout_files))
-    target_layouts:[[dict]] = list(map(parse_named_kle, target_layout_files))
-    known_paths:[str] = input_layout_files + target_layout_files
-
-    # Prepare data
-    sanitise_layouts(target_layouts, input_layouts)
-
-    # Analyse coverage
+    # Perform the analysis
     exit_code:int
     coverage_data:List[dict]
-    (exit_code, coverage_data) = run_analyses(pargs, target_layouts, input_layouts)
+    known_paths:[str]
+    (exit_code, coverage_data, known_paths) = keycov(pargs)
 
     # Output coverage data
     tdump:Callable = lambda cd: output_as_text(pargs, known_paths, cd)
@@ -42,6 +33,28 @@ def main(args:[str]) -> int:
         print()
 
     return exit_code
+
+def keycov(pargs:Union[Namespace, dict]) -> Tuple[int, dict, List[str]]:
+    # Apply default arguments if (possibly-incomplete) dictionary passed
+    if type(pargs) == dict:
+        dargs = dict(map(lambda d: (d['dest'], d['default']), args))
+        pargs = Namespace(**dict_union(dargs, pargs))
+
+    # Collect input data
+    input_layout_files:[str] = get_json_and_yaml_files(pargs.input_dir)
+    target_layout_files:[str] = get_json_and_yaml_files(pargs.target_dir)
+    input_layouts:[[dict]] = list(map(parse_named_kle, input_layout_files))
+    target_layouts:[[dict]] = list(map(parse_named_kle, target_layout_files))
+    known_paths:[str] = input_layout_files + target_layout_files
+
+    # Prepare data
+    sanitise_layouts(target_layouts, input_layouts)
+
+    # Analyse coverage
+    exit_code:int
+    coverage_data:List[dict]
+    (exit_code, coverage_data) = run_analyses(pargs, target_layouts, input_layouts)
+    return (exit_code, coverage_data, known_paths)
 
 def parse_named_kle(fname:str) -> Tuple[str, List[dict]]:
     return (fname, parse_kle(fname))
