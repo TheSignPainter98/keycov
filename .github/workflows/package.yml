@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate distributables v3
+name: Generate distributables v4
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -24,6 +24,7 @@ jobs:
         run: pip3 install pipreqs
       - name: Generate the artifacts
         run: |
+          export PATH=$PATH:~/.local/bin
           make clean
           make dist -B VERSION=${{ steps.tag_name.outputs.tag }}
       - name: Attach artifacts to release
