@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate distributables v1
+name: Generate distributables v2
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -16,6 +16,8 @@ jobs:
       - name: Get current tag
         uses: olegtarasov/get-tag@v2
         id: tag_name
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       - name: Install pipreqs
         run: pip3 install pipreqs
       - name: Generate the artifacts
