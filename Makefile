@@ -1,6 +1,6 @@
 #!/usr/bin/make
 
-.DEFAULT_GOAL = run
+.DEFAULT_GOAL = all
 
 # Build parameters
 VERSION = v0.0.1
@@ -13,6 +13,9 @@ KEYCOV_DIST_SRCS = requirements.txt README.md LICENSE $(KEYCOV_RUN_SRCS) $(KEYCO
 
 # Programs
 ZIP = zip -q -MM
+
+all: $(KEYCOV_RUN_SRCS)
+.PHONY: all
 
 run: $(KEYCOV_RUN_SRCS)
 	-@python3 ./keycov.py -v3
