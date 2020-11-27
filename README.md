@@ -84,7 +84,7 @@ There is also a python API which can be accessed through the `keycov` function i
 
 ## Building from the Source
 
-Building and running from the source has the same requirements as general setup, with the addition of [`git`][git], [`make`][make] and [`pipreqs`][pipreqs] (only required to make a distributable).
+Building and running from the source has the same requirements as general setup, with the addition of [`git`][git], [`make`][make] and [`pipreqs`][pipreqs] (only required to make a distributable) as well as some [standard UNIX applications][standard-unix-applications].
 The build system has been tested on Linux, although it’s quite simple and shouldn’t be _too_ much of a problem to get working on MacOS or Windows with help from [Gow][gow] or something.
 
 To download and build the code, run:
@@ -128,15 +128,17 @@ More specifically, it reduces to [set cover,][set-cover] a standard problem in t
 2. We do not know whether one _can_ or _cannot_ exist on our classical hardware.
 
 [code-of-conduct]: https://github.com/TheSignPainter98/adjust-keys/blob/master/.github/CODE_OF_CONDUCT.md
+[git]: https://git-scm.com/downloads
 [github]: http://www.github.com/TheSignPainter98/keycov
-[gow]
+[gow]: https://github.com/bmatzelle/gow/wiki
 [kle]: http://www.keyboard-layout-editor.com "Keyboard layout editor"
 [latest-release]: https://github.com/TheSignPainter98/keycov/releases/latest
-[make]
+[make]: https://www.gnu.org/software/make/
 [pip3]: https://pip.pypa.io/en/stable/
-[pipreqs]
+[pipreqs]: https://github.com/bndr/pipreqs
 [prime-sets]: https://github.com/TheSignPainter98/keycov/blob/master/src/coverage_analyser.py#L8
 [python3]: https://www.python.org
 [set-cover]: https://www.geeksforgeeks.org/set-cover-problem-set-1-greedy-approximate-algorithm/
-[src-args-args]
-[src-keycov_main]
+[src-args-args]: https://github.com/TheSignPainter98/keycov/blob/master/src/args.py
+[src-keycov_main]: https://github.com/TheSignPainter98/keycov/blob/master/src/keycov_main.py
+[standard-unix-applications]: https://en.wikipedia.org/wiki/Category:Standard_Unix_programs
