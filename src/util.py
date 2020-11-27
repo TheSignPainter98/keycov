@@ -38,6 +38,9 @@ def fst(p:tuple) -> object:
 def snd(p:tuple) -> object:
     return p[1]
 
+def swp(p:tuple) -> tuple:
+    return (p[0], p[1])
+
 def dict_union_ignore_none(a: dict, b: dict) -> dict:
     return dict(a, **dict(filter(lambda p: p[1] is not None, b.items())))
 

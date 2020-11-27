@@ -1,4 +1,4 @@
-from .util import add, fst, snd, concat
+from .util import add, concat, fst, snd, swp
 from .coverage_analyser import get_covering_sets
 from argparse import Namespace
 from functools import reduce
@@ -226,7 +226,7 @@ def most_common_keeb_keys(pargs:Namespace, _1:dict, _2:[dict], input_layouts:[di
 
 def most_common_keys(layouts:[dict], output_cutoff:int) -> [str]:
     key_occurrences:dict = count_key_occurrences(layouts)
-    sorted_occurrences:[str] = list(map(lambda p: '%s (%s)' %(p[0], p[1]), sorted(key_occurrences.items(), key=snd, reverse=True)))
+    sorted_occurrences:[str] = list(map(lambda p: '%s (%s)' % p, sorted(key_occurrences.items(), key=swp)))
 
     if output_cutoff > 0:
         return sorted_occurrences[:output_cutoff]

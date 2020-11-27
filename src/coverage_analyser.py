@@ -42,7 +42,7 @@ def get_covering_sets(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[
 
     # Reunite set names with their contents
     set_dict:dict = dict(sets)
-    return list(map(lambda c: list(map(lambda s: (s, set_dict[s]), c)), covering_sets))
+    return list(map(lambda c: list(map(lambda s: (s, set_dict[s]), c)), sorted(covering_sets)))
 
 def gcd(a:int, b:int) -> int:
     while b != 0:
