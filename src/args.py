@@ -23,7 +23,7 @@ args:[dict] = [
         'short': '-V',
         'long': '--version',
         'action': 'store_true',
-        'help': 'Show the current version and exit',
+        'help': 'Show the current version and licensing information then exit',
         'type': bool,
         'default': False
     },
@@ -50,7 +50,7 @@ args:[dict] = [
         'short': '-k',
         'long': '--kit-dir',
         'action': 'store',
-        'help': 'Specify the directory from which kit kle files are read',
+        'help': 'Specify the directory from which kit KLE files are read',
         'type': str,
         'sanitiser': dir_str,
         'metavar': 'dir',
@@ -61,7 +61,7 @@ args:[dict] = [
         'short': '-l',
         'long': '--layout-dir',
         'action': 'store',
-        'help': 'Specify the directory from which layouts to cover files are read',
+        'help': 'Specify the directory from which keyboard layouts KLEs to cover are read',
         'type': str,
         'sanitiser': dir_str,
         'metavar': 'dir',
@@ -77,10 +77,10 @@ args:[dict] = [
         'metavar': 'format',
         'default': 'text',
         'choices': [
+            'json',
+            'none',
             'text',
             'yaml',
-            'json',
-            'none'
         ]
     },
     {
@@ -115,7 +115,7 @@ args:[dict] = [
         'short': '-C',
         'long': '--colour',
         'action': 'store_true',
-        'help': 'Force colour output (override default heuristics)',
+        'help': 'Force colour output (override heuristics)',
         'type': bool,
         'default': False
     },
@@ -124,7 +124,7 @@ args:[dict] = [
         'short': '-c',
         'long': '--no-colour',
         'action': 'store_true',
-        'help': 'Force no colour output (override default heuristics)',
+        'help': 'Force no colour output (override heuristics)',
         'type': bool,
         'default': False
     },
@@ -134,7 +134,7 @@ args:[dict] = [
         'long': '--theme',
         'action': 'store',
         'metavar': 'theme',
-        'help': 'Set the colour theme for the text output tables',
+        'help': 'Set the colour theme for the text-output tables',
         'type': str,
         'default': rel_path('themes/default.yml')
     }
@@ -205,9 +205,22 @@ def check_args(args: dict) -> 'Maybe str':
     return '\n'.join(wrong_types + wrong_choices)
 
 def arg_inf(arg:dict) -> str:
-    if 'default' in arg:
-        return ' (default: %s%s)' % (arg['default'], ' ' + arg['arg_inf_msg'] if 'arg_inf_msg' in arg else '')
-    return ''
+    info:[str] = []
+    arg_formats:[Tuple[str,Callable]] = [
+        ('default', lambda s: 'default: %s' % s),
+        ('choices', lambda s: 'choices: { %s }' % ', '.join(map(str,s))),
+        ('arg_inf_msg', str),
+    ]
+    for k,f in arg_formats:
+        if k in arg:
+            info.append(f(arg[k]))
+
+    info_str:str = ''
+    if info != []:
+        info_str = ' (%s)' % ', '.join(info)
+    else:
+        info_str = ''
+    return info_str
 
 def get_long_help() -> str:
     table:BeautifulTable = BeautifulTable()
