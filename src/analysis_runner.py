@@ -18,17 +18,16 @@ def run_analyses(pargs:Namespace, keeb_layouts:[[dict]], kit_layouts:[[dict]]) -
 
     # Run the analyses
     for analysis in ordered_analyses:
-        fname:str = analysis['name'] if not analysis['name'].startswith('~') else analysis['name'][1:]
-        if not hasattr(analyses_mod, fname):
-            print('Analysis function "%s" was requested but is not present in module src.analyses' % fname, file=stderr)
+        if not hasattr(analyses_mod, analysis['func-name']):
+            print('Analysis function "%s" was requested but is not present in module src.analyses' % analysis['func-name'], file=stderr)
             exit_code = -1
             continue
-        func:Callable = getattr(analyses_mod, fname)
+        func:Callable = getattr(analyses_mod, analysis['func-name'])
         props:int = analysis['analysis-properties']
         if props & AnalysisTypes.GLOBAL:
             ret:object
             try:
-                ret = func(pargs, coverage_data, keeb_layouts, kit_layouts)
+                ret = func(pargs, coverage_data['~results'], keeb_layouts, kit_layouts)
             except AnalysisFailedError as afe:
                 print(afe.message, file=stderr)
                 exit_code |= analysis['exit-code']
@@ -37,9 +36,9 @@ def run_analyses(pargs:Namespace, keeb_layouts:[[dict]], kit_layouts:[[dict]]) -
                 ret = ret.result
             if pargs.analysis_verbosity >= analysis['verbosity']:
                 coverage_data['global-results'][analysis['pretty-name']] = ret
-            coverage_data['~results'][analysis['name']] = ret
+            coverage_data['~results'][analysis['func-name']] = ret
         elif props & AnalysisTypes.LOCAL:
-            coverage_data['~results'][analysis['name']] = {}
+            coverage_data['~results'][analysis['func-name']] = {}
             if props & AnalysisTypes.INDIVIDUAL_KITS or props & AnalysisTypes.INDIVIDUAL_KEEBS:
                 if props & AnalysisTypes.INDIVIDUAL_KITS:
                     exit_code |= handle_analysis_on_individuals(pargs, analysis, func, coverage_data, 'local-kit-results', kit_layouts)
@@ -61,7 +60,7 @@ def handle_analysis_on_individuals(pargs:Namespace, analysis:dict, func:Callable
         ret:object = None
         if perform_analysis:
             try:
-                ret = func(pargs, coverage_data, const_layout)
+                ret = func(pargs, coverage_data['~results'], const_layout)
             except AnalysisFailedError as afe:
                 print(afe.message, file=stderr)
                 exit_code = analysis['exit-code']
@@ -70,7 +69,7 @@ def handle_analysis_on_individuals(pargs:Namespace, analysis:dict, func:Callable
                 ret = ret.result
         if pargs.analysis_verbosity >= analysis['verbosity']:
             coverage_data[output_key][const_layout[0]][analysis['pretty-name']] = ret
-        coverage_data['~results'][analysis['name']][const_layout[0]] = ret
+        coverage_data['~results'][analysis['func-name']][const_layout[0]] = ret
     return exit_code
 
 def handle_analysis_iteration(pargs:Namespace, analysis:dict, func:Callable, coverage_data:dict, output_key:str, iter_layouts:[dict], const_layouts:[[dict]], perform_analysis:bool=True) -> int:
@@ -79,7 +78,7 @@ def handle_analysis_iteration(pargs:Namespace, analysis:dict, func:Callable, cov
         ret:object = None
         if perform_analysis:
             try:
-                ret = func(pargs, coverage_data, iter_layout, const_layouts)
+                ret = func(pargs, coverage_data['~results'], iter_layout, const_layouts)
             except AnalysisFailedError as afe:
                 print(afe.message, file=stderr)
                 exit_code = analysis['exit-code']
@@ -88,7 +87,7 @@ def handle_analysis_iteration(pargs:Namespace, analysis:dict, func:Callable, cov
                 ret = ret.result
         if pargs.analysis_verbosity >= analysis['verbosity']:
             coverage_data[output_key][iter_layout[0]][analysis['pretty-name']] = ret
-        coverage_data['~results'][analysis['name']][iter_layout[0]] = ret
+        coverage_data['~results'][analysis['func-name']][iter_layout[0]] = ret
     return exit_code
 
 def sanitise(coverage_data:Union[dict, List[dict]]) -> dict:
@@ -118,6 +117,7 @@ def sanitise_analyses(analyses:[dict]) -> [dict]:
         'analysis-properties': lambda _: AnalysisTypes.GLOBAL,
         'pretty-name': lambda a: a['name'],
         'exit-code': lambda _: 1,
+        'func-name': lambda a: a['name'][1:] if a['name'].startswith('~') else a['name']
     }
     for analysis in analyses:
         for default in defaults:
