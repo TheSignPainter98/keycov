@@ -1,16 +1,16 @@
-# Maintainer: Ed Jones <ej@kcza.net>
-# Contributor: Ed Jones <ej@kcza.net>
+# Maintainer: Ed Jones <ej sent to kcza.net>
+# Contributor: Ed Jones <ej sent to kcza.net>
 
 pkgname=s_pkgname
 pkgver=s_pkgver
 pkgrel=1
-source=('s_pkgname-s_pkgver.tar.xz')
-arch=('x86_64')
-license=('LGPL3')
 pkgdesc='s_pkgdesc'
+arch=('any')
 url=https://github.com/TheSignPainter98/keycov
-changelog=ChangeLog
+license=('LGPL3')
 depends=(s_depends)
+# changelog=ChangeLog
+source=('s_pkgname-s_pkgver.tar.xz')
 sha256sums=('s_sha256sum')
 sha512sums=('s_sha512sum')
 

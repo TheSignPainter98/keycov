@@ -69,6 +69,9 @@ src/keycov/version.py: src/keycov/version.py.in keycov.yml
 pkging/aur/%/PKGBUILD: pkging/aur/%/PKGBUILD.in scripts/pkggen keycov.yml requirements.txt $(ZIPPED_DIST_PKG)
 	./scripts/pkggen $< $@
 
+pkging/aur/%/.SRCINFO: pkging/aur/%/PKGBUILD
+	(cd $(dir $<) && makepkg --printsrcinfo) > $@
+
 keycov.yml: keycov.yml.in
 	sed "s/VERSION/$(VERSION)/g" < $< > $@
 
