@@ -13,8 +13,8 @@ ZIPPED_DIST_PKG = $(DIST_PKG).xz
 KEYCOV_RAW_SRCS = src/keycov.py $(filter-out src/keycov/version.py,$(wildcard src/keycov/*.py))
 KEYCOV_RUN_SRCS = src/keycov/version.py $(KEYCOV_RAW_SRCS)
 KEYCOV_DATA_SRCS = $(wildcard keebs/*) $(wildcard kits/*) $(wildcard themes/*)
-KEYCOV_DIST_SRCS = requirements.txt README.md LICENSE keycov.1.gz $(KEYCOV_RUN_SRCS) $(KEYCOV_DATA_SRCS)
-DIST_PKG_SRCS = keycov LICENSE keycov.1.gz
+KEYCOV_DIST_SRCS = requirements.txt README.md LICENSE keycov.1.gz ChangeLog $(KEYCOV_RUN_SRCS) $(KEYCOV_DATA_SRCS)
+DIST_PKG_SRCS = keycov LICENSE keycov.1.gz ChangeLog
 
 # Programs
 ZIP = zip -q -MM
@@ -78,5 +78,8 @@ keycov.yml: keycov.yml.in
 requirements.txt: $(KEYCOV_RAW_SRCS)
 	pipreqs --force --print >$@
 
+ChangeLog: scripts/change-log.sh scripts/change-log-format.awk $(KEYCOV_RUN_SRCS)
+	./$< > $@
+
 clean:
-	$(RM) -r requirements.txt src/keycov/version.py keycov.zip __pycache__/ pkging/PKGBUILD keycov keycov-*.tar keycov-*.tar.xz keycov.yml $(wildcard *.1) $(wildcard *.1.gz) keycov-bin/ keycov-bintemp $(DIST_STAMP)/
+	$(RM) -r requirements.txt src/keycov/version.py keycov.zip __pycache__/ pkging/PKGBUILD keycov keycov-*.tar keycov-*.tar.xz keycov.yml $(wildcard *.1) $(wildcard *.1.gz) keycov-bin/ keycov-bintemp $(DIST_STAMP)/ ChangeLog
