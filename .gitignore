@@ -18,3 +18,4 @@ keycov-bin
 keycov-bintemp
 ChangeLog
 .SRCINFO
+pkg/
