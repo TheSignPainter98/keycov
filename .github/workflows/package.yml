@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate distributables v4
+name: Generate distributables v5
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -32,4 +32,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: keycov.zip
+          args: keycov keycov.zip keycov-${{ steps.tag_name.outputs.tag }}.tar.xz keycov-bin-${{ steps.tag_name.outputs.tag }}.tar.xz
+      - name: Update keycov AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@v2
+        with:
+          pkgname: keycov
+          pkgbuild: ./pkging/aur/keycov/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Updated AUR package
+          ssh_keyscan_types: rsa,dsa,ecdsa,ed25519
+      - name: Update keycov-bin AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@v2
+        with:
+          pkgname: keycov-bin
+          pkgbuild: ./pkging/aur/keycov-bin/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Updated AUR package
+          ssh_keyscan_types: rsa,dsa,ecdsa,ed25519
