@@ -18,7 +18,7 @@ SDIST_PKG_SRCS = LICENSE keycov.1.gz ChangeLog build-binary.sh $(KEYCOV_RUN_SRCS
 AUR_PKGBUILDS = $(foreach p,$(shell ls pkging/aur/),pkging/aur/$p/PKGBUILD)
 AUR_DISTS = $(foreach p,$(shell ls pkging/aur/),$p-$(SEMVERSION).tar.xz)
 AUR_PKG_THINGS = $(AUR_DISTS) $(AUR_PKGBUILDS)
-DISTRIBUTABLES = $(AUR_PKG_THINGS)
+DISTRIBUTABLES = keycov keycov.zip $(AUR_PKG_THINGS)
 
 # Programs
 ZIP = zip -q -MM
