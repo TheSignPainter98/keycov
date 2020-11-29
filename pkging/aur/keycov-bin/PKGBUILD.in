@@ -1,0 +1,35 @@
+# Maintainer: Ed Jones <ej sent to kcza.net>
+# Contributor: Ed Jones <ej sent to kcza.net>
+
+pkgname=s_pkgname
+pkgver=s_pkgver
+pkgrel=1
+pkgdesc='s_pkgdesc'
+arch=('any')
+url=https://github.com/TheSignPainter98/keycov
+license=('LGPL3')
+conflicts=(keycov)
+depends=(s_depends)
+# changelog=ChangeLog
+source=('s_pkgname-s_pkgver.tar.xz')
+sha256sums=('s_sha256sum')
+sha512sums=('s_sha512sum')
+
+package()
+{
+	cd "$srcdir/$pkgname-$pkgver"
+	install -dm755 "${pkgdir}/usr/bin"
+	install -dm755 "${pkgdir}/usr/share/licenses/${pkgname}"
+	install -dm755 "${pkgdir}/usr/share/man/man1"
+
+	install -Dm755 "keycov" "${pkgdir}/usr/bin/${pkgname}"
+	install -Dm755 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+	install -Dm755 "keycov.1.gz" "${pkgdir}/usr/share/man/man1"
+}
+
+check()
+{
+	cd "$srcdir/$pkgname-$pkgver"
+	./keycov --version >/dev/null
+}
+

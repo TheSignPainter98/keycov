@@ -1,0 +1,4 @@
+name: keycov
+version: VERSION
+desc: An automatic keycap kitting analyser
+bug_report_address: 'https://github.com/TheSignPainter98/keycov/issues'

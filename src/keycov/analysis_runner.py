@@ -1,4 +1,4 @@
-import src.analyses as analyses_mod
+import keycov.analyses as analyses_mod
 from .analyses import analyses, AnalysisFailedError, AnalysisTypes, DEFAULT_VERBOSITY, FailedAnalysisResult
 from .args import Namespace
 from .coverage_analyser import get_covering_sets

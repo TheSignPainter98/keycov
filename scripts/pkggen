@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+if [[ $# -lt 2 ]]; then
+	echo "usage: $0 infile outfile" >&2
+	exit 1
+fi
+
+# # Generate ChangeLog
+# ./change-log.sh > ./ChangeLog
+
+# Get package data
+pkgname=$3
+pkgver=$(yq -y .version keycov.yml | head -n 1 | sed 's/^v//')
+pkgdesc=$(yq -y .desc keycov.yml | head -n 1)
+
+# Compute checksums
+sha256sum=$(sha256sum "$pkgname-$pkgver.tar.xz" | cut -d' ' -f1)
+sha512sum=$(sha512sum "$pkgname-$pkgver.tar.xz" | cut -d' ' -f1)
+
+# Parse dependencies
+depends=$( (cut -d= -f1 | sed 's/PyYAML/yaml/' | sed 's/^/python-/' | tr '\n' ' ' | sed 's/ $//') < requirements.txt )
+
+# Generate PKGBUILD
+(
+	sed "s/s_pkgname/$pkgname/" \
+	| sed "s/s_pkgver/$pkgver/" \
+	| sed "s/s_pkgdesc/$pkgdesc/" \
+	| sed "s/s_depends/$depends/" \
+	| sed "s/s_sha256sum/$sha256sum/" \
+	| sed "s/s_sha512sum/$sha512sum/"
+) < $1 > $2
+
+# Lint the PKGBUILD
+namcap $2
