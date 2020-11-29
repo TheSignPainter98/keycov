@@ -11,7 +11,7 @@ fi
 # ./change-log.sh > ./ChangeLog
 
 # Get package data
-pkgname=$(yq -y .name keycov.yml | head -n 1)
+pkgname=$3
 pkgver=$(yq -y .version keycov.yml | head -n 1 | sed 's/^v//')
 pkgdesc=$(yq -y .desc keycov.yml | head -n 1)
 

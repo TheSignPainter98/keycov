@@ -8,19 +8,12 @@ pkgdesc='s_pkgdesc'
 arch=('any')
 url=https://github.com/TheSignPainter98/keycov
 license=('LGPL3')
-conflicts=(keycov-bin)
+conflicts=(keycov)
 depends=(s_depends)
-makedepends=(zip)
 # changelog=ChangeLog
 source=('s_pkgname-s_pkgver.tar.xz')
 sha256sums=('s_sha256sum')
 sha512sums=('s_sha512sum')
-
-build()
-{
-	cd "$srcdir/$pkgname-$pkgver"
-	./build-binary.sh
-}
 
 package()
 {

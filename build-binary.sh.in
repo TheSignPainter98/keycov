@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+
+# Make the necessary directories
+if [[ ! -d keycov-binary/ ]]; then
+	mkdir keycov-binary/
+	mkdir keycov-binary/src/
+	mkdir keycov-binary/src/keycov/
+fi
+
+# Copy the sources
+cp --parents KEYCOV_RUN_SRCS keycov-binary/
+
+# Make the main file
+cp keycov-binary/src/keycov.py keycov-binary/src/__main__.py
+
+# Zip up the files and add the shebang
+(cd keycov-binary/src/ && zip -q -MM - $(find)) > keycov-binarytemp
+(echo '#!/usr/bin/env python3' | cat - keycov-binarytemp) > keycov
+
+# Ensure correct permissions
+chmod 755 keycov
