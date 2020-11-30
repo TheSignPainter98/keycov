@@ -25,7 +25,7 @@ ZIP = zip -q -MM
 XZ = xz
 XZ_FLAGS = -kf
 
-all: $(KEYCOV_RUN_SRCS)
+all: keycov
 .PHONY: all
 
 run: $(KEYCOV_RUN_SRCS)
