@@ -1,6 +1,9 @@
 from functools import reduce
 from typing import Callable, Tuple
 
+default_text_colour:str = '#000000'
+default_cap_colour:str = '#cccccc'
+
 default_terminal_dims:Tuple[int, int] = (80, 24)
 special_properties:dict = {
     'H': lambda k: k['n'],
@@ -67,8 +70,12 @@ def key_pretty_name(key:dict) -> str:
     for flag,cond in sorted(special_properties.items(), key=fst):
         if cond(key):
             key_props += flag
+    key_colours:[str] = []
+    for colour_key,pretty_colour_key,default_colour in [('c', '𝕔', default_cap_colour), ('t', '𝕥', default_text_colour)]:
+        if key[colour_key] != default_colour:
+            key_colours.append(pretty_colour_key + key[colour_key])
 
-    return '-'.join([name, dimensions] + ([key_props] if key_props else []))
+    return '-'.join([name, dimensions] + ([key_props] if key_props else []) + key_colours)
 
 def compose(f:Callable, g:Callable) -> Callable:
     return lambda x: f(g(x))

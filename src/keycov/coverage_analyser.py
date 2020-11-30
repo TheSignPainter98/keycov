@@ -28,7 +28,7 @@ def get_covering_sets(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[
 
         child_covering_sets:[str] = []
         for s in psets:
-            r2:int = r / gcd(r, s[1])
+            r2:int = r // gcd(r, s[1])
             csp2:int = csp * s[1]
             # Explore beneficial unexplored children
             if r != r2 and csp2 not in seen:
@@ -47,6 +47,7 @@ def get_covering_sets(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[
 def gcd(a:int, b:int) -> int:
     while b != 0:
         (a, b) = (b, a % b)
+        print(type(b))
     return a
 
 def primes() -> [int]:

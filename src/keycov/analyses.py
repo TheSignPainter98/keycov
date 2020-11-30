@@ -281,33 +281,41 @@ def count_covering_set_units(_1:Namespace, coverage_data:dict, keeb:Tuple[str, L
 
 def covering_set_of_lowest_units(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> Tuple[str, List[dict]]:
     csus:List[Tuple[str, List[dict]]] = coverage_data['count_covering_set_units'][keeb[0]]
-    return min(csus, key=fst)
+    return min(csus, key=fst) if len(csus) != 0 else None
 
 def covering_set_of_lowest_units_surplus(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
     cs:Tuple[float, List[Tuple[str, List[dict]]]] = coverage_data['covering_set_of_lowest_units'][keeb[0]]
-    return (cs[0] - get_total_units(keeb), list(map(fst, cs[1])))
+    return (cs[0] - get_total_units(keeb), list(map(fst, cs[1]))) if cs != None else None
 
 def covering_set_of_lowest_units_surplus_amount(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> [str]:
-    return coverage_data['covering_set_of_lowest_units_surplus'][keeb[0]][0]
+    cset:Tuple[int, List[Tuple[str, List[dict]]]] = coverage_data['covering_set_of_lowest_units_surplus'][keeb[0]]
+    return cset[0] if cset != None else None
 
 def covering_set_of_lowest_units_surplus_value(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> [str]:
-    return coverage_data['covering_set_of_lowest_units_surplus'][keeb[0]][1]
+    cset:Tuple[int, List[Tuple[str, List[dict]]]] = coverage_data['covering_set_of_lowest_units_surplus'][keeb[0]]
+    return cset[1] if cset != None else None
 
 def covering_set_cardinalities(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
     css:List[Tuple[str, List[dict]]] = coverage_data['compute_covering_set'][keeb[0]]
     return list(map(lambda cs: (len(cs), cs), css))
 
 def covering_set_of_lowest_cardinality(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
-    return min(coverage_data['covering_set_cardinalities'][keeb[0]], key=fst)
+    cscs:List[int, Tuple[str, List[dict]]] = coverage_data['covering_set_cardinalities'][keeb[0]]
+    return min(cscs, key=fst) if cscs != [] else None
 
 def covering_set_of_lowest_cardinality_amount(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
-    return coverage_data['covering_set_of_lowest_cardinality'][keeb[0]][0]
+    csc:Tuple[str, List[dict]] = coverage_data['covering_set_of_lowest_cardinality'][keeb[0]]
+    return csc[0] if csc is not None else None
 
 def covering_set_of_lowest_cardinality_value(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> [str]:
-    return list(map(fst, coverage_data['covering_set_of_lowest_cardinality'][keeb[0]][1]))
+    cscs:List[int, Tuple[str, List[dict]]] = coverage_data['covering_set_of_lowest_cardinality'][keeb[0]]
+    return list(map(fst, cscs[1])) if cscs is not None else None
 
 def smallest_covering_kit_set_is_minimal_surplus_covering_kit_set(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> bool:
-    smallest_covering_set:Set[Tuple[str, [dict]]] = set(map(fst, coverage_data['covering_set_of_lowest_cardinality'][keeb[0]][1]))
+    cslc:List[int, Tuple[str, List[dict]]] = coverage_data['covering_set_of_lowest_cardinality'][keeb[0]]
+    if cslc is None:
+        return None
+    smallest_covering_set:Set[Tuple[str, [dict]]] = set(map(fst, cslc[1]))
     minimal_surplus_covering_set:Set[Tuple[str, [dict]]] = set(map(fst, coverage_data['covering_set_of_lowest_units'][keeb[0]][1]))
     return smallest_covering_set == minimal_surplus_covering_set
 
@@ -315,14 +323,14 @@ def all_keyboards_have_smallest_covering_kit_set_is_minimal_surplus_covering_kit
     return all(coverage_data['smallest_covering_kit_set_is_minimal_surplus_covering_kit_set'].values())
 
 def most_cumbersome_keyboard(_1:Namespace, coverage_data:dict, _2:[dict], _3:[dict]) -> str:
-    lowest_cardinality_covering_sets:List[Tuple[int, str]] = list(map(lambda p: (p[1][0], p[0]), coverage_data['covering_set_of_lowest_cardinality'].items()))
+    lowest_cardinality_covering_sets:List[Tuple[int, str]] = list(map(lambda p: (p[1][0], p[0]), filter(lambda p: p[1] is not None, coverage_data['covering_set_of_lowest_cardinality'].items())))
     if lowest_cardinality_covering_sets == []:
         return None
     mck:Tuple[int, str] = max(lowest_cardinality_covering_sets, key=fst)
     return '%s (%d)' %(mck[1], mck[0])
 
 def most_wasteful_keyboard(_1:Namespace, coverage_data:dict, _2:[dict], _3:[dict]) -> str:
-    lowest_units_covering_sets:List[Tuple[float, str]] = list(map(lambda p: (p[1][0], p[0]), coverage_data['covering_set_of_lowest_units_surplus'].items()))
+    lowest_units_covering_sets:List[Tuple[float, str]] = list(map(lambda p: (p[1][0], p[0]), filter(lambda p: p[1] is not None, coverage_data['covering_set_of_lowest_units_surplus'].items())))
     if lowest_units_covering_sets == []:
         return None
     mwk:Tuple[int, str] = max(lowest_units_covering_sets, key=fst)
