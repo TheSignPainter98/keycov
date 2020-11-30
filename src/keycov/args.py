@@ -1,7 +1,7 @@
 # Copyright (C) Edward Jones
 
 from .analyses import analyses, DEFAULT_VERBOSITY
-from .util import default_terminal_dims, dict_union, dict_union_ignore_none, repeat, restrict_dict
+from .util import compose, default_terminal_dims, dict_union, dict_union_ignore_none, notf, repeat, restrict_dict
 from .version import version_notice
 from argparse import ArgumentParser, Namespace
 from beautifultable import ALIGN_LEFT, BeautifulTable
@@ -47,24 +47,22 @@ args:[dict] = [
     },
     {
         'dest': 'input_dir',
-        'short': '-k',
-        'long': '--kit-dir',
+        'mandatory-order': 1,
         'action': 'store',
         'help': 'Specify the directory from which kit KLE files are read',
         'type': str,
         'sanitiser': dir_str,
-        'metavar': 'dir',
+        'metavar': 'kit-dir',
         'default': rel_path('kits')
     },
     {
         'dest': 'target_dir',
-        'short': '-l',
-        'long': '--layout-dir',
+        'mandatory-order': 2,
         'action': 'store',
         'help': 'Specify the directory from which keyboard layouts KLEs to cover are read',
         'type': str,
         'sanitiser': dir_str,
-        'metavar': 'dir',
+        'metavar': 'keeb-dir',
         'default': rel_path('keebs')
     },
     {
@@ -136,7 +134,7 @@ args:[dict] = [
         'metavar': 'theme',
         'help': 'Set the colour theme for the text-output tables',
         'type': str,
-        'default': rel_path('themes/default.yml')
+        'default': ''
     }
 ]
 arg_dict:dict = { a['dest']: a for a in args if 'dest' in a }
@@ -152,16 +150,16 @@ def parse_args(iargs: tuple) -> Namespace:
     ap: ArgumentParser = ArgumentParser(description=description, add_help=False)
 
     # Generate the argument parser
-    for arg in list(sorted(args, key=lambda arg: arg['short'].lower())):
-        ap.add_argument(
-            arg['short'], arg['long'],
-            **dict_union(
-                {
+    mandatory_args:[dict] = list(filter(arg_is_mandatory, args))
+    optional_args:[dict] = list(filter(compose(notf, arg_is_mandatory), args))
+    for arg in list(sorted(mandatory_args, key=lambda arg: arg['mandatory-order'])) + list(sorted(optional_args, key=lambda arg: arg['short'].lower() + arg['long'].lower())):
+        ap_args:list = [arg['short'], arg['long']] if not arg_is_mandatory(arg) else []
+        ap_kwargs:dict = dict_union({
                     k: v
                     for k, v in arg.items()
                     if k in ['dest', 'action', 'metavar', 'version'] + (['type'] if arg['type'] != bool else [])
-                },
-                {'help': arg['help'] + arg_inf(arg)} if 'help' in arg else {}))
+                }, {'help': arg['help'] + arg_inf(arg)} if 'help' in arg else {})
+        ap.add_argument(*ap_args, **ap_kwargs)
 
     # Sanitise and obtain parsed arguments
     pargs: dict = ap.parse_args(iargs[1:]).__dict__
@@ -194,6 +192,9 @@ def parse_args(iargs: tuple) -> Namespace:
 
 
     return npargs
+
+def arg_is_mandatory(arg:dict) -> bool:
+    return not 'short' in arg and not 'long' in arg
 
 def check_args(args: dict) -> 'Maybe str':
     items: [[str, object]] = args.items()

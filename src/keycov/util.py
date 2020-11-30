@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Tuple
+from typing import Callable, Tuple
 
 default_terminal_dims:Tuple[int, int] = (80, 24)
 special_properties:dict = {
@@ -69,3 +69,9 @@ def key_pretty_name(key:dict) -> str:
             key_props += flag
 
     return '-'.join([name, dimensions] + ([key_props] if key_props else []))
+
+def compose(f:Callable, g:Callable) -> Callable:
+    return lambda x: f(g(x))
+
+def notf(c:bool) -> bool:
+    return not c
