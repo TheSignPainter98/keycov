@@ -66,7 +66,7 @@ keycov-bin-$(SEMVERSION).tar: $(DIST_PKG_SRCS)
 
 keycov: $(KEYCOV_RUN_SRCS)
 	[[ ! -d keycov-binary/ ]] && mkdir keycov-binary/ || true
-	[[ ! -d keycov-binary/ ]] && mkdir keycov-binary/keycov/ || true
+	[[ ! -d keycov-binary/keycov/ ]] && mkdir keycov-binary/keycov/ || true
 	cp --parents $(KEYCOV_RUN_SRCS) keycov-binary/
 	cp keycov-binary/src/keycov.py keycov-binary/src/__main__.py
 	(cd keycov-binary/src/ && zip -q -MM - $$(find)) > $@-binarytemp
