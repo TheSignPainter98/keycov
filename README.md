@@ -119,8 +119,6 @@ If you’d like to contribute, please abide by the [code of conduct.][code-of-co
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 
-I hope floating point errors don’t ruin the nice prime-based set data-structure I used [here.][prime-sets]
-
 Please don’t be surprised if KeyCov takes a while to perform its analyses, finding a minimum-size set of kits which cover a keyboard is believed to be a computationally-hard problem (the time to solve it scales very poorly with the size of the input).
 More specifically, it reduces to [set cover,][set-cover] a standard problem in theoretical computer science for which:
 
