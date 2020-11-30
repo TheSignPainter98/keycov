@@ -53,7 +53,6 @@ args:[dict] = [
         'type': str,
         'sanitiser': dir_str,
         'metavar': 'kit-dir',
-        'default': rel_path('kits')
     },
     {
         'dest': 'target_dir',
@@ -63,7 +62,6 @@ args:[dict] = [
         'type': str,
         'sanitiser': dir_str,
         'metavar': 'keeb-dir',
-        'default': rel_path('keebs')
     },
     {
         'dest': 'output_format',
@@ -164,7 +162,7 @@ def parse_args(iargs: tuple) -> Namespace:
     # Sanitise and obtain parsed arguments
     pargs: dict = ap.parse_args(iargs[1:]).__dict__
 
-    dargs = { a['dest']: a['default'] for a in args if 'dest' in a }
+    dargs = { a['dest']: a['default'] for a in args if 'dest' in a and 'default' in a }
     rargs: dict = dict_union_ignore_none(dargs, pargs)
     #  rargs = dict(map(lambda p: (p[0], arg_dict[p[0]]['type'](p[1])), rargs.items()))
     checkResult:str = check_args(rargs)
