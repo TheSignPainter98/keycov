@@ -47,7 +47,6 @@ def get_covering_sets(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[
 def gcd(a:int, b:int) -> int:
     while b != 0:
         (a, b) = (b, a % b)
-        print(type(b))
     return a
 
 def primes() -> [int]:
