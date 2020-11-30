@@ -6,37 +6,37 @@ from os import environ, linesep
 from os.path import sep
 from re import match
 from shutil import get_terminal_size
-from sys import platform, stdout
+from sys import exit, platform, stderr, stdout
+from termcolor import ATTRIBUTES, colored as coloured, COLORS as COLOURS, HIGHLIGHTS
 from types import SimpleNamespace
 from typing import List, Union
 
-terminal_formats:dict = {}
 formats:SimpleNamespace = None
 default_formats:dict = {
-    'tick_format': 0,
-    'cross_format': 0,
-    'num_format': 0,
-    'header_format': 0,
-    'path_format': 0,
-    'empty_string_format': 0,
-    'empty_string_string': '/',
-    'empty_list_format': 0,
+    'tick_format': 'green',
+    'cross_format': 'red',
+    'num_format': ['dark', 'cyan'],
+    'header_format': ['bold', 'blue'],
+    'path_format': 'underline',
+    'empty_string_format': 'red',
+    'empty_string_string': '-',
+    'empty_list_format': 'red',
     'empty_list_string': '∅',
-    'none_format': 0,
+    'none_format': 'red',
     'none_string': '-',
 }
 float_output_precision:int = 2
-END_CODE:int = '\033[0m'
 
 keycap_pretty_name_regex:str = r'^[^ \n]*[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}(\[[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}\])?(-[%s]+)?(-[ctCT𝕔𝕥]#[0-9a-fA-F]+){0,2}$' % ''.join(special_properties.keys())
 
 def output_as_text(pargs:Namespace, known_paths:[str], coverage_data:dict) -> str:
-    global formats, terminal_formats
+    global formats
 
     # Resolve the theme
-    theme:dict = read_yaml(pargs.theme)
-    terminal_formats = theme['terminal_formats']
-    formats = SimpleNamespace(**dict_union(default_formats, theme['formats']))
+    user_theme:dict = None
+    if pargs.theme != '':
+        user_theme = read_yaml(pargs.theme)
+    formats = SimpleNamespace(**dict_union(default_formats, user_theme) if user_theme is not None else default_formats)
 
     # Remove data not to be printed
     remove_private_data(coverage_data)
@@ -120,11 +120,23 @@ def apply_formatting(pargs:Namespace, formatting:int, s:str) -> str:
         formats_to_apply = formatting
     else:
         formats_to_apply = [formatting]
+    colour:str = None
+    on_colour:str = None
+    attrs:str = []
     for format_to_apply in formats_to_apply:
-        formatting_codes += '\033[' + terminal_formats[format_to_apply]
+        if format_to_apply in COLOURS:
+            colour = format_to_apply
+        elif format_to_apply in HIGHLIGHTS:
+            on_colour = format_to_apply
+        elif format_to_apply in ATTRIBUTES:
+            attrs.append(format_to_apply)
+        elif format_to_apply is None:
+            pass
+        else:
+            print('Unknown format "%s" acceptible values %s' % (format_to_apply, str([None] + list(COLOURS.keys()) + list(HIGHLIGHTS.keys()) + list(ATTRIBUTES.keys()))), file=stderr)
+            exit(1)
 
-    end_formatting:str = END_CODE if formatting_codes else ''
-    return formatting_codes + s + end_formatting
+    return coloured(s, color=colour, on_color=on_colour, attrs=attrs)
 
 def use_colour(pargs:Namespace, file=stdout) -> bool:
     plat:str = platform
