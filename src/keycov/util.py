@@ -1,5 +1,5 @@
 from functools import reduce
-from typing import Tuple
+from typing import Callable, Tuple
 
 default_text_colour:str = '#000000'
 default_cap_colour:str = '#cccccc'
@@ -75,5 +75,10 @@ def key_pretty_name(key:dict) -> str:
         if key[colour_key] != default_colour:
             key_colours.append(pretty_colour_key + key[colour_key])
 
-
     return '-'.join([name, dimensions] + ([key_props] if key_props else []) + key_colours)
+
+def compose(f:Callable, g:Callable) -> Callable:
+    return lambda x: f(g(x))
+
+def notf(c:bool) -> bool:
+    return not c
