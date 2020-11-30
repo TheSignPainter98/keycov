@@ -1,5 +1,5 @@
 from .util import add, concat, fst, snd, swp
-from .coverage_analyser import get_covering_sets
+from .coverage_analyser import get_covering_sets, get_uncovered
 from argparse import Namespace
 from functools import reduce
 from typing import List, Tuple
@@ -210,6 +210,13 @@ analyses:[dict] = [
             'exists_covering_set',
         ]
     },
+    {
+        'name': 'uncovered_keys',
+        'pretty-name': 'Uncovered keys',
+        'description': 'A list of uncovered keys',
+        'verbosity': 2,
+        'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.ITERATE_KITS | AnalysisTypes.ITERATE_KEEBS
+    }
 ]
 
 def num_keebs(_1:Namespace, _2:dict, target_layouts:[dict], _3:[dict]) -> int:
@@ -351,3 +358,6 @@ def least_used_kit(_1:Namespace, coverage_data:dict, keebs:[dict], kits:[dict]) 
     luk:Tuple[str, int] = min(counted_occurrences, key=snd)
 
     return '%s (%d)' % luk
+
+def uncovered_keys(pargs:Namespace, _:dict, keeb:Tuple[str, List[dict]], kits:List[Tuple[str, List[dict]]]) -> List[dict]:
+    return get_uncovered(keeb, kits)[:pargs.output_list_cutoff]

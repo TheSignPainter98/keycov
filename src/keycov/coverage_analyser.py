@@ -1,4 +1,4 @@
-from .util import iconcat, mult
+from .util import fst, iconcat, mult, snd
 from copy import copy
 from functools import reduce
 from math import ceil, sqrt, gcd as hcf
@@ -43,6 +43,19 @@ def get_covering_sets(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[
     # Reunite set names with their contents
     set_dict:dict = dict(sets)
     return list(map(lambda c: list(map(lambda s: (s, set_dict[s]), c)), sorted(covering_sets)))
+
+def get_uncovered(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[dict]]]) -> List[Tuple[str, List[dict]]]:
+    keys_to_cover:[str] = list(map(lambda c: c['serialised'], to_cover[1]))
+    uncovered:dict = { key: 0 for key in keys_to_cover }
+    for key in keys_to_cover:
+        uncovered[key] += 1
+
+    for _,keys in sets:
+        for key in map(lambda k: k['serialised'], keys):
+            if key in uncovered and uncovered[key] >= 1:
+                uncovered[key] -= 1
+
+    return list(map(fst, sorted(filter(lambda p: p[1] > 0, uncovered.items()), key=snd)))
 
 def gcd(a:int, b:int) -> int:
     while b != 0:

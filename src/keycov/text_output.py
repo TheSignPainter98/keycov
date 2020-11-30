@@ -18,10 +18,13 @@ default_formats:dict = {
     'num_format': ['dark', 'cyan'],
     'header_format': ['bold', 'blue'],
     'path_format': 'underline',
+    'keycap_name_format': 'green',
     'empty_string_format': 'red',
     'empty_string_string': '-',
     'empty_list_format': 'red',
     'empty_list_string': '∅',
+    'empty_set_format': 'red',
+    'empty_set_string': '∅',
     'none_format': 'red',
     'none_string': '-',
 }
