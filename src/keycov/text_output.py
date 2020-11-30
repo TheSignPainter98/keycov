@@ -28,7 +28,7 @@ default_formats:dict = {
 float_output_precision:int = 2
 END_CODE:int = '\033[0m'
 
-keycap_pretty_name_regex:str = r'^[^ \n]*[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}(\[[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}\])?(-[%s]+)?$' % ''.join(special_properties.keys())
+keycap_pretty_name_regex:str = r'^[^ \n]*[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}(\[[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}\])?(-[%s]+)?(-[ctCT𝕔𝕥]#[0-9a-fA-F]+){0,2}$' % ''.join(special_properties.keys())
 
 def output_as_text(pargs:Namespace, known_paths:[str], coverage_data:dict) -> str:
     global formats, terminal_formats

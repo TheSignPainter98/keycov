@@ -1,4 +1,4 @@
-from .util import flatten, iconcat
+from .util import default_cap_colour, default_text_colour, flatten, iconcat
 from .yaml_io import read_yaml
 from types import SimpleNamespace
 from typing import Union
@@ -12,11 +12,13 @@ parser_initial_state:dict = {
     'h2': 1.0,
     'w2': 1.0,
     'l': False,
-    'n': False
+    'n': False,
+    'c': default_cap_colour,
+    't': default_text_colour,
 }
 parser_state_keys:[dict] = parser_initial_state.keys()
 parser_state_reset_keys:[str] = ['d', 'w', 'h', 'w2', 'h2', 'l', 'n']
-parser_state_output_keys:[str] = ['p', 'w', 'h', 'w2', 'h2', 'l', 'n']
+parser_state_output_keys:[str] = ['p', 'w', 'h', 'w2', 'h2', 'l', 'n', 'c', 't']
 
 def parse_kle(fname:str) -> [dict]:
     return parse_kle_raw(read_yaml(fname))
