@@ -159,10 +159,9 @@ def parse_args(iargs: tuple) -> Namespace:
                 }, {'help': arg['help'] + arg_inf(arg)} if 'help' in arg else {})
         ap.add_argument(*ap_args, **ap_kwargs)
 
-    # Sanitise and obtain parsed arguments
+    # Sanitise and obtain parsed arguments, delay error messages from missing mandatory arguments
     numMissingMandatoryPositionals:int = len(mandatory_args) - len(list(filter(lambda a: not a.startswith('-'), iargs[1:])))
-    pseudo_iargs:[str] = iargs[1:] + [ None for _ in range(numMissingMandatoryPositionals) ]
-    print(pseudo_iargs)
+    pseudo_iargs:[str] = iargs[1:] + [ "" for _ in range(numMissingMandatoryPositionals) ]
     pargs: dict = ap.parse_args(pseudo_iargs).__dict__
 
     dargs = { a['dest']: a['default'] for a in args if 'dest' in a and 'default' in a }
@@ -193,7 +192,7 @@ def parse_args(iargs: tuple) -> Namespace:
 
     # This dumb hacky way of printing out the error information is because the `exit_on_error=False` parameter of ArgumentParser *exits regardless* when a mandatory argument is omitted, instead of raising an exception
     if numMissingMandatoryPositionals > 0:
-        ap.parse_args(args[1:])
+        ap.parse_args(iargs[1:])
         exit(1)
 
     return npargs
