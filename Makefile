@@ -107,4 +107,4 @@ ChangeLog: scripts/change-log.sh scripts/change-log-format.awk $(KEYCOV_RUN_SRCS
 	./$< > $@
 
 clean:
-	$(RM) -r requirements.txt src/keycov/version.py keycov.zip __pycache__/ pkging/aur/**/PKGBUILD keycov keycov-*.tar keycov-*.tar.xz keycov.yml $(wildcard *.1) $(wildcard *.1.gz) keycov-binary/ keycov-binarytemp ChangeLog build-binary.sh
+	$(RM) -r requirements.txt src/keycov/version.py keycov.zip __pycache__/ pkging/aur/**/PKGBUILD keycov keycov-*.tar keycov-*.tar.xz keycov.yml $(wildcard *.1) $(wildcard *.1.gz) keycov-binary/ keycov-binarytemp ChangeLog build-binary.sh keycov.pdf
