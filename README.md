@@ -64,9 +64,7 @@ optional arguments:
 Before running, KeyCov will require two things:
 
 1. A folder containing the keyboards the user wishes to support (in [KLE][kle] format).
-   By default this the `keebs/` directory next to `keycov.py`.
 2. A folder containing the kits the user proposes for their set (in [KLE][kle] format)
-   By default this the `kits/` directory next to `keycov.py`.
 
 To run KeyCov, open a terminal and type the following (assuming that the [latest release][latest-release] was unzipped to `~/Downloads/keycov/`).
 
@@ -75,12 +73,15 @@ cd ~/Downloads/keycov/
 python3 keycov.py
 ```
 
-This will output a basic set of analyses; KeyCov defaults to verbosity level 1.
+This will output a basic set of analyses; KeyCov defaults to analysis-verbosity level 1.
 For more information, pass a higher verbosity number by running something like `python3 keycov.py --analysis-verbosity=3`
 Details on the analyses performed and the verbosity levels required to output them are shown by passing KeyCov the `--long-help` flag.
 
 Aside from text, KeyCov supports `json` and `yaml` output formats to allow an interface with a more customer-friendly front-end (e.g a keycap set website).
 There is also a python API which can be accessed through the `keycov` function in [`src.keycov_main`][src-keycov_main] which takes a dictionaries with keys specified by the `dest` field in entry in [`src.args.args`][src-args-args].
+
+If running on Linux or macOS, it is possible to make the `python3` command above somewhat shorter by downloading the `keycov` binary from the [latest release][latest-release] and replacing the `python3 keycov.py` above with `./keycov`.
+The file `./keycov` is just a zip archive of the source which can be run by python anywhere (assuming it can access its dependencies).
 
 ## Building from the Source
 
