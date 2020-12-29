@@ -10,9 +10,9 @@ SEMVERSION = $(subst v,,$(VERSION))
 KEYCOV_RAW_SRCS = src/keycov.py $(filter-out src/keycov/version.py,$(wildcard src/keycov/*.py))
 KEYCOV_RUN_SRCS = src/keycov/version.py $(KEYCOV_RAW_SRCS)
 KEYCOV_DATA_SRCS = $(wildcard keebs/*) $(wildcard kits/*) $(wildcard themes/*)
-KEYCOV_DIST_SRCS = requirements.txt README.md LICENSE keycov.1.gz ChangeLog $(KEYCOV_RUN_SRCS) $(KEYCOV_DATA_SRCS)
-DIST_PKG_SRCS = keycov LICENSE keycov.1.gz ChangeLog
-SDIST_PKG_SRCS = LICENSE keycov.1.gz ChangeLog build-binary.sh $(KEYCOV_RUN_SRCS)
+KEYCOV_DIST_SRCS = requirements.txt README.md LICENSE keycov.pdf keycov.1.gz ChangeLog $(KEYCOV_RUN_SRCS) $(KEYCOV_DATA_SRCS)
+DIST_PKG_SRCS = keycov LICENSE keycov.pdf keycov.1.gz ChangeLog
+SDIST_PKG_SRCS = LICENSE keycov.pdf keycov.1.gz ChangeLog build-binary.sh $(KEYCOV_RUN_SRCS)
 
 # Distributables
 AUR_PKGBUILDS = $(foreach p,$(shell ls pkging/aur/),pkging/aur/$p/PKGBUILD)
@@ -73,11 +73,14 @@ keycov: $(KEYCOV_RUN_SRCS)
 	(echo '#!/usr/bin/env python3' | cat - $@-binarytemp) > $@
 	chmod 700 $@
 
+keycov.pdf: keycov.1
+	groff -man -Tpdf -fH < $< > $@
+
 keycov.1.gz: keycov.1
 	gzip -kf $<
 
-keycov.1: keycov src/keycov/version.py
-	(help2man --no-discard-stderr ./keycov | awk '$$0 == ".SH \"SEE ALSO\"" {exit} 1') < ./$< > $@
+keycov.1: keycov src/keycov/version.py keycov.yml
+	help2man --no-info --no-discard-stderr --name "$$(yq -r .desc keycov.yml | head -n -1)" ./$< > $@
 
 src/keycov/version.py: src/keycov/version.py.in keycov.yml
 	(sed "s/s_version/$(VERSION)/" | sed "s/s_name/$(shell yq -y .name keycov.yml | head -n1)/" | sed "s/s_desc/$(shell yq -y .desc keycov.yml | head -n1)/") < $< > $@

@@ -14,6 +14,7 @@ keycov
 !keycov/
 *.[0-9]
 *.[0-9].*
+*.pdf
 keycov-binary
 keycov-binarytemp
 ChangeLog
