@@ -1,6 +1,7 @@
 #!/usr/bin/make
 
 .DEFAULT_GOAL = all
+SHELL := bash
 
 # Build parameters
 VERSION = v0.0.1
@@ -8,7 +9,7 @@ SEMVERSION = $(subst v,,$(VERSION))
 
 # Sources
 KEYCOV_RAW_SRCS = src/keycov.py $(filter-out src/keycov/version.py,$(wildcard src/keycov/*.py))
-KEYCOV_RUN_SRCS = src/keycov/version.py $(KEYCOV_RAW_SRCS)
+KEYCOV_RUN_SRCS = keycov.py src/keycov/version.py $(KEYCOV_RAW_SRCS)
 KEYCOV_DATA_SRCS = $(wildcard keebs/*) $(wildcard kits/*) $(wildcard themes/*)
 KEYCOV_DIST_SRCS = requirements.txt README.md LICENSE keycov.pdf keycov.1.gz ChangeLog $(KEYCOV_RUN_SRCS) $(KEYCOV_DATA_SRCS)
 DIST_PKG_SRCS = keycov LICENSE keycov.pdf keycov.1.gz ChangeLog
@@ -29,8 +30,11 @@ all: keycov
 .PHONY: all
 
 run: $(KEYCOV_RUN_SRCS)
-	-@python3 ./keycov.py -v3
+	-@python3 ./keycov.py -v3 kits keebs
 .PHONY: run
+
+keycov.py: src/keycov.py
+	ln -s $< $@
 
 github-dist: dist zip-dist
 .PHONY: github-dist

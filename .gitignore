@@ -21,3 +21,5 @@ ChangeLog
 .SRCINFO
 pkg/
 build-binary.sh
+keycov.py
+!src/keycov.py
