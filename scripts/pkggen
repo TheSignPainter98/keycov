@@ -33,4 +33,6 @@ depends=$( (cut -d= -f1 | sed 's/PyYAML/yaml/' | sed 's/^/python-/' | tr '\n' ' 
 ) < $1 > $2
 
 # Lint the PKGBUILD
-namcap $2
+if command -v namcap >/dev/null 2>/dev/null; then
+	namcap $2
+fi
