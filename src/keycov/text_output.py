@@ -64,7 +64,7 @@ def make_table(pargs:Namespace, known_paths:[str], table_data:[dict]) -> str:
     table.columns.header = list(map(lambda c: apply_formatting(pargs, formats.header_format, c), col_names))
 
     # Add table body content
-    body:[[object]] = list(map(lambda r: list(map(lambda f: _format_field(pargs, known_paths, f[1]), r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data)))
+    body:[[object]] = list(sorted(map(lambda r: list(map(lambda f: _format_field(pargs, known_paths, f[1]), r)), map(lambda r: list(sorted(r.items(), key=lambda p: col_names_order[p[0]])), table_data))))
     for record in body:
         table.rows.append(record)
 
