@@ -45,7 +45,7 @@ def keycov(pargs:Union[Namespace, dict]) -> Tuple[int, dict, List[str]]:
 
     # Collect input data
     input_layout_files:[str] = get_json_and_yaml_files(pargs.input_dir)
-    target_layout_files:[str] = get_json_and_yaml_files(pargs.target_dir)
+    target_layout_files:[str] = get_json_and_yaml_files(pargs.targets)
     input_layouts:[[dict]] = list(map(parse_named_kle, input_layout_files))
     target_layouts:[[dict]] = list(map(parse_named_kle, target_layout_files))
     known_paths:[str] = input_layout_files + target_layout_files
