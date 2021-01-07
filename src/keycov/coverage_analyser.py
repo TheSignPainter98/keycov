@@ -16,29 +16,41 @@ def get_covering_sets(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[
 
     # Represent each layout as the product of the primes which represent its keys
     primed_to_cover = (to_cover[0], reduce(mult, map(lambda k: seen_keys[k['serialised']], to_cover[1]), 1))
-    primed_sets = list(map(lambda s: (s[0], reduce(mult, map(lambda k: seen_keys[k['serialised']], s[1]), 1)), sets))
+    primed_sets = list(map(lambda s: (s[0], next(prime), reduce(mult, map(lambda k: seen_keys[k['serialised']], s[1]), 1)), sets))
 
-    seen:set = set()
-    def primes_dfs(r:int, csp:int, csns:[str], psets:List[Tuple[str, int]]) -> [[str]]:
-        seen.add(csp)
+    # Set of tuples containing the remainder and set of currently chosen keysets (as a number)
+    seen:Set[Tuple[int, int]] = set()
+    ##
+    # @brief Perform a depth-first search on the set to cover,k
+    #
+    # @param r:int                  Uncovered remainder
+    # @param cp:int                 Current path number
+    # @param csp:int                Covering-set number
+    # @param csns:[str]             Covering-set member names
+    # @param psets:List[Tuple[str   Primed candidate sets
+    #
+    # @return
+    def primes_dfs(r:int, cp:int, csp:int, csns:[str], psets:List[Tuple[str, int, int]]) -> [[str]]:
+        seen.add((r, cp))
         if r == 1:
             return [csns]
         elif psets == []:
             return []
 
         child_covering_sets:[str] = []
-        for s in psets:
-            r2:int = r // gcd(r, s[1])
-            csp2:int = csp * s[1]
+        for n,p,kn in psets:
+            r2:int = r // gcd(r, kn)
+            cp2:int = cp * p
+            csp2:int = csp * kn
             # Explore beneficial unexplored children
-            if r != r2 and csp2 not in seen:
-                psets2:List[Tuple[str, int]] = copy(psets)
-                psets2.remove(s)
-                child_covering_sets.extend(primes_dfs(r2, csp2, csns + [s[0]], psets2))
+            if r != r2 and (r2, cp2) not in seen:
+                psets2:List[Tuple[str, int, int]] = copy(psets)
+                psets2.remove((n,p,kn))
+                child_covering_sets.extend(primes_dfs(r2, cp2, csp2, csns + [n], psets2))
         return child_covering_sets
 
     # Perform dfs over covering sets
-    covering_sets:[str] = primes_dfs(primed_to_cover[1], 1, [], primed_sets)
+    covering_sets:[str] = primes_dfs(primed_to_cover[1], 1, 1, [], primed_sets)
 
     # Reunite set names with their contents
     set_dict:dict = dict(sets)
