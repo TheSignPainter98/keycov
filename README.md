@@ -120,8 +120,13 @@ If you’d like to contribute, please abide by the [code of conduct.][code-of-co
 
 This [code][github] was written by Ed Jones (Discord `@kcza#4691`).
 
-Please don’t be surprised if KeyCov takes a while to perform its analyses, finding a minimum-size set of kits which cover a keyboard is believed to be a computationally-hard problem (the time to solve it scales very poorly with the size of the input).
-More specifically, it reduces to [set cover,][set-cover] a standard problem in theoretical computer science for which:
+Please don’t be surprised if KeyCov takes a while to perform its analyses, with many input layouts, there is an exponentially-large number of states which must be checked in order to return accurate results.
+
+There is an option to speed up the analysis (`-q`/`--quick-coverage-analysis`) by not considering the kits chosen in reaching a certain coverage-point, but some caution is advised.
+When used, the result for whether there _exists_ a covering set is still guaranteed to be correct, but the _number_ of covering sets becomes a lower-bound, and the size of the smallest covering set becomes an upper-bound as some possibilities can be disregarded.
+
+This faster version can still take one time, but at this point the problem of finding a more efficient algorithm becomes a fundamental one.
+The problem now considered is exactly [set cover,][set-cover] a standard problem in theoretical computer science for which:
 
 1. We do not know of an algorithm which runs in less-than exponential time and,
 2. We do not know whether one _can_ or _cannot_ exist on our classical hardware.

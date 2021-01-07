@@ -263,7 +263,7 @@ def get_units(key:dict) -> float:
     return max(considered_dims)
 
 def compute_covering_set(pargs:Namespace, _:dict, keeb:Tuple[str, List[dict]], kits:List[Tuple[str, List[dict]]]) -> List[Tuple[str, List[dict]]]:
-    covering_sets:List[Tuple[str, List[dict]]] = get_covering_sets(keeb, kits)
+    covering_sets:List[Tuple[str, List[dict]]] = get_covering_sets(pargs.approximate_coverage_analysis, keeb, kits)
     if not covering_sets:
         return FailedAnalysisResult(covering_sets)
     return covering_sets
