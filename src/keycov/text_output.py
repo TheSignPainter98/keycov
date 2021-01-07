@@ -101,7 +101,7 @@ def format_str(pargs:Namespace, known_paths:[str], s:str) -> str:
     if not s:
         return apply_formatting(pargs, formats.empty_string_format, formats.empty_string_string)
     def format_word(pargs:Namespace, known_paths:[str], s:str) -> str:
-        if s in known_paths or (pargs.input_dir and s.startswith(pargs.input_dir)) or (pargs.target_dir and s.startswith(pargs.target_dir)) or s[-4:] in ['.json', '.yml', '.yaml'] or s.endswith(sep):
+        if s in known_paths or (pargs.input_dir and s.startswith(pargs.input_dir)) or any(map(lambda t: s.startswith(t), pargs.targets)) or s[-4:] in ['.json', '.yml', '.yaml'] or s.endswith(sep):
             return apply_formatting(pargs, formats.path_format, s)
         if match(keycap_pretty_name_regex, s) is not None:
             return apply_formatting(pargs, formats.keycap_name_format, s)

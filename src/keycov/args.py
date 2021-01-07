@@ -14,7 +14,7 @@ from typing import Callable
 
 description:str = 'A little script for helping keycap designers analyse kitting coverage'
 
-dir_str:Callable = lambda s: normpath(s) + sep
+dir_str:Callable = lambda s: normpath(s)
 rel_path:Callable = lambda p: relpath(join(dirname(__file__), '..', p), start=getcwd())
 
 args:[dict] = [
@@ -55,13 +55,13 @@ args:[dict] = [
         'metavar': 'kit-dir',
     },
     {
-        'dest': 'target_dir',
+        'dest': 'targets',
         'mandatory-order': 2,
         'action': 'store',
         'help': 'Specify the directory from which keyboard layouts KLEs to cover are read',
-        'type': str,
+        'type': [str],
         'sanitiser': dir_str,
-        'metavar': 'keeb-dir',
+        'metavar': 'keeb-loc',
     },
     {
         'dest': 'output_format',
@@ -155,8 +155,12 @@ def parse_args(iargs: tuple) -> Namespace:
         ap_kwargs:dict = dict_union({
                     k: v
                     for k, v in arg.items()
-                    if k in ['dest', 'action', 'metavar', 'version'] + (['type'] if arg['type'] != bool else [])
-                }, {'help': arg['help'] + arg_inf(arg)} if 'help' in arg else {})
+                    if k in ['dest', 'action', 'metavar', 'version']
+                }, {'help': arg['help'] + arg_inf(arg)} if 'help' in arg else {},
+                {} if arg['type'] == bool
+                    else { 'type': arg['type'][0], 'nargs': '+' } if type(arg['type']) == list
+                    else { 'type': arg['type'] }
+                )
         ap.add_argument(*ap_args, **ap_kwargs)
 
     # Sanitise and obtain parsed arguments, delay error messages from missing mandatory arguments
@@ -176,7 +180,10 @@ def parse_args(iargs: tuple) -> Namespace:
     # Sanitise arguments
     for arg in args:
         if 'sanitiser' in arg:
-            rargs[arg['dest']] = arg['sanitiser'](rargs[arg['dest']])
+            if type(arg['type']) == list:
+                rargs[arg['dest']] = list(map(lambda a: arg['sanitiser'](a), rargs[arg['dest']]))
+            else:
+                rargs[arg['dest']] = arg['sanitiser'](rargs[arg['dest']])
 
     npargs:Namespace = Namespace(**rargs)
     if npargs.show_help:
@@ -201,13 +208,19 @@ def arg_is_mandatory(arg:dict) -> bool:
     return not 'short' in arg and not 'long' in arg
 
 def check_args(args: dict) -> 'Maybe str':
-    items: [[str, object]] = args.items()
-    if all(map(lambda a: type(a[1]) == arg_dict[a[0]]['type'], items)) and all(map( lambda a: 'choices' not in arg_dict[a[0]] or a[1] in arg_dict[a[0]] ['choices'], items)):
+    items: [[str, object]] = list(args.items())
+    if all(map(lambda a: _type_check_arg(*a), items)) and all(map(lambda a: 'choices' not in arg_dict[a[0]] or a[1] in arg_dict[a[0]]['choices'], items)):
         return None
-    wrong_types:[str] = list(map(lambda a: 'Expected %s value for %s but got %s' %(str(arg_dict[a[0]]['type']), arg_dict[a[0]]['dest'], str(a[1])), filter(lambda a: type(a[1]) != arg_dict[a[0]]['type'], items)))
+    wrong_types:[str] = list(map(lambda a: 'Expected %s value for %s but got %s' %(str(arg_dict[a[0]]['type']), arg_dict[a[0]]['dest'], str(a[1])), filter(lambda a: _type_check_arg(*a), items)))
     wrong_choices:[str] = list(map(lambda a: 'Argument %s only accepts %s but got %s' % (arg_dict[a[0]]['dest'], ', '.join(list(map(str, arg_dict[a[0]]['choices']))), str(a[1])), filter(lambda a: 'choices' in arg_dict[a[0]] and a[1] not in arg_dict[a[0]]['choices'], items)))
 
     return '\n'.join(wrong_types + wrong_choices)
+
+def _type_check_arg(key:str, value:object) -> bool:
+    exptype:type = arg_dict[key]['type']
+    if type(exptype) == list:
+        return all(map(lambda m: type(m) == exptype[0], value))
+    return type(value) == exptype
 
 def arg_inf(arg:dict) -> str:
     info:[str] = []
