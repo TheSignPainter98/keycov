@@ -34,6 +34,7 @@ keycap_pretty_name_regex:str = r'^[^ \n]*[0-9]+\.[0-9]{2}x[0-9]+\.[0-9]{2}(\[[0-
 
 def output_as_text(pargs:Namespace, known_paths:[str], coverage_data:dict) -> str:
     global formats
+    de_primer:dict = coverage_data['~results']['de_primer']
 
     # Resolve the theme
     user_theme:dict = None

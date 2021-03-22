@@ -1,7 +1,7 @@
 from .util import add, concat, fst, snd, swp
 from .coverage_analyser import get_covering_sets, get_uncovered
 from argparse import Namespace
-from functools import reduce
+from functools import partial, reduce
 from typing import List, Tuple
 
 DEFAULT_VERBOSITY:int = 1
@@ -18,6 +18,9 @@ class AnalysisTypes:
     INDIVIDUAL_KEEBS:int = 0x8
     ITERATE_KITS:int = 0x10
     ITERATE_KEEBS:int = 0x20
+    ITERATE_KIT_KEYS:int = 0x40
+    ITERATE_KEEB_KEYS:int = 0x80
+
 
 class FailedAnalysisResult:
     result:object
@@ -216,6 +219,20 @@ analyses:[dict] = [
         'description': 'A list of uncovered keys',
         'verbosity': 2,
         'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.ITERATE_KITS | AnalysisTypes.ITERATE_KEEBS
+    },
+    {
+        'name': 'key_to_kit_membership',
+        'pretty-name': 'Present in kits',
+        'description': 'A list of kits which contain some key',
+        'verbosity': 2,
+        'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.ITERATE_KIT_KEYS
+    },
+    {
+        'name': 'key_to_keeb_membership',
+        'pretty-name': 'Present in keyboards',
+        'description': 'A list of keyboards which contain some key',
+        'verbosity': 2,
+        'analysis-properties': AnalysisTypes.LOCAL | AnalysisTypes.ITERATE_KEEB_KEYS
     }
 ]
 
@@ -243,19 +260,20 @@ def count_key_occurrences(layouts:Tuple[str, List[dict]]) -> dict:
     occurrences:dict = {}
     for layout in layouts:
         for key in layout[1]:
-            if key['pretty-name'] in occurrences:
-                occurrences[key['pretty-name']] += 1
+            if key in occurrences:
+                occurrences[key] += 1
             else:
-                occurrences[key['pretty-name']] = 1
+                occurrences[key] = 1
     return occurrences
 
-def count_units(_1:Namespace, _2:dict, layout:tuple) -> float:
-    return get_total_units(layout)
+def count_units(aargs:Namespace, _2:dict, layout:tuple) -> float:
+    return get_total_units(aargs.de_primer, layout)
 
-def get_total_units(layout:Tuple[str, List[dict]]) -> float:
-    return reduce(lambda a,b: a + b, map(get_units, layout[1]), 0.0)
+def get_total_units(de_primer:dict, layout:Tuple[str, List[dict]]) -> float:
+    return reduce(lambda a,b: a + b, map(partial(get_units, de_primer), layout[1]), 0.0)
 
-def get_units(key:dict) -> float:
+def get_units(de_primer:dict, key_prime:int) -> float:
+    key:dict = de_primer[key_prime]
     considered_dims:[float] = [key['w'], key['h']]
     extra_dims:[float] = [key['w2'], key['h2']]
     if any(map(lambda v: v != 1, extra_dims)):
@@ -282,17 +300,17 @@ def all_kits_covered(_1:dict, coverage_data:dict, _2:List[Tuple[str, List[dict]]
 def number_of_covering_sets(_1:dict, coverage_data:dict, layout:[dict]) -> int:
     return len(coverage_data['compute_covering_set'][layout[0]])
 
-def count_covering_set_units(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> Tuple[str, List[dict]]:
+def count_covering_set_units(aargs:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> Tuple[str, List[dict]]:
     css:List[Tuple[str, List[dict]]] = coverage_data['compute_covering_set'][keeb[0]]
-    return list(map(lambda cs: (reduce(add, map(lambda s: get_total_units(s), cs), 0.0), cs), css))
+    return list(map(lambda cs: (reduce(add, map(lambda s: get_total_units(aargs.de_primer, s), cs), 0.0), cs), css))
 
 def covering_set_of_lowest_units(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> Tuple[str, List[dict]]:
     csus:List[Tuple[str, List[dict]]] = coverage_data['count_covering_set_units'][keeb[0]]
     return min(csus, key=fst) if len(csus) != 0 else None
 
-def covering_set_of_lowest_units_surplus(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
+def covering_set_of_lowest_units_surplus(aargs:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> float:
     cs:Tuple[float, List[Tuple[str, List[dict]]]] = coverage_data['covering_set_of_lowest_units'][keeb[0]]
-    return (cs[0] - get_total_units(keeb), list(map(fst, cs[1]))) if cs != None else None
+    return (cs[0] - get_total_units(aargs.de_primer, keeb), list(map(fst, cs[1]))) if cs != None else None
 
 def covering_set_of_lowest_units_surplus_amount(_1:Namespace, coverage_data:dict, keeb:Tuple[str, List[dict]]) -> [str]:
     cset:Tuple[int, List[Tuple[str, List[dict]]]] = coverage_data['covering_set_of_lowest_units_surplus'][keeb[0]]
@@ -361,3 +379,9 @@ def least_used_kit(_1:Namespace, coverage_data:dict, keebs:[dict], kits:[dict]) 
 
 def uncovered_keys(pargs:Namespace, _:dict, keeb:Tuple[str, List[dict]], kits:List[Tuple[str, List[dict]]]) -> List[dict]:
     return get_uncovered(keeb, kits)[:pargs.output_list_cutoff]
+
+def key_to_kit_membership(aargs:Namespace, results:dict, key:int, const_kits:List[Tuple[str, List[int]]]) -> List[str]:
+    return key_to_keeb_membership(aargs, results, key, const_kits)
+
+def key_to_keeb_membership(aargs:Namespace, _:dict, key:int, const_keebs:List[Tuple[str, List[int]]]) -> List[str]:
+    return list(map(fst, filter(lambda keeb: key in snd(keeb), const_keebs)))

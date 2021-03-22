@@ -211,7 +211,7 @@ def check_args(args: dict) -> 'Maybe str':
     items: [[str, object]] = list(args.items())
     if all(map(lambda a: _type_check_arg(*a), items)) and all(map(lambda a: 'choices' not in arg_dict[a[0]] or a[1] in arg_dict[a[0]]['choices'], items)):
         return None
-    wrong_types:[str] = list(map(lambda a: 'Expected %s value for %s but got %s' %(str(arg_dict[a[0]]['type']), arg_dict[a[0]]['dest'], str(a[1])), filter(lambda a: _type_check_arg(*a), items)))
+    wrong_types:[str] = list(map(lambda a: 'Expected %s value for %s but got %s' %(str(arg_dict[a[0]]['type']), arg_dict[a[0]]['dest'], str(a[1])), filter(lambda a: not _type_check_arg(*a), items)))
     wrong_choices:[str] = list(map(lambda a: 'Argument %s only accepts %s but got %s' % (arg_dict[a[0]]['dest'], ', '.join(list(map(str, arg_dict[a[0]]['choices']))), str(a[1])), filter(lambda a: 'choices' in arg_dict[a[0]] and a[1] not in arg_dict[a[0]]['choices'], items)))
 
     return '\n'.join(wrong_types + wrong_choices)

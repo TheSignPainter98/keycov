@@ -1,22 +1,13 @@
 from .util import fst, iconcat, mult, snd
 from copy import copy
 from functools import reduce
-from math import ceil, sqrt, gcd as hcf
 from re import match
 from typing import List, Set, Tuple
 
-def get_covering_sets(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[dict]]]) -> List[Tuple[str, List[dict]]]:
-    # Generate a unique prime for each unique key
-    prime:iter = primes()
-    seen_keys:dict = {}
-    for layout in sets + [to_cover]:
-        for key in layout[1]:
-            if key['serialised'] not in seen_keys:
-                seen_keys[key['serialised']] = next(prime)
-
+def get_covering_sets(to_cover:Tuple[str, List[int]], sets:Set[Tuple[str, List[int]]]) -> List[Tuple[str, List[int]]]:
     # Represent each layout as the product of the primes which represent its keys
-    primed_to_cover = (to_cover[0], reduce(mult, map(lambda k: seen_keys[k['serialised']], to_cover[1]), 1))
-    primed_sets = list(map(lambda s: (s[0], next(prime), reduce(mult, map(lambda k: seen_keys[k['serialised']], s[1]), 1)), sets))
+    primed_to_cover = (to_cover[0], reduce(mult, to_cover[1], 1))
+    primed_sets = list(map(lambda s: (s[0], 1, reduce(mult, s[1], 1)), sets))
 
     # Set of tuples containing the remainder and set of currently chosen keysets (as a number)
     seen:Set[Tuple[int, int]] = set()
@@ -56,14 +47,14 @@ def get_covering_sets(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[
     set_dict:dict = dict(sets)
     return list(map(lambda c: list(map(lambda s: (s, set_dict[s]), c)), sorted(covering_sets)))
 
-def get_uncovered(to_cover:Tuple[str, List[dict]], sets:Set[Tuple[str, List[dict]]]) -> List[Tuple[str, List[dict]]]:
-    keys_to_cover:[str] = list(map(lambda c: c['serialised'], to_cover[1]))
+def get_uncovered(to_cover:Tuple[str, List[int]], sets:Set[Tuple[str, List[int]]]) -> List[Tuple[str, List[dict]]]:
+    keys_to_cover:[int] = to_cover[1]
     uncovered:dict = { key: 0 for key in keys_to_cover }
     for key in keys_to_cover:
         uncovered[key] += 1
 
     for _,keys in sets:
-        for key in map(lambda k: k['serialised'], keys):
+        for key in keys:
             if key in uncovered and uncovered[key] >= 1:
                 uncovered[key] -= 1
 
@@ -73,19 +64,3 @@ def gcd(a:int, b:int) -> int:
     while b != 0:
         (a, b) = (b, a % b)
     return a
-
-def primes() -> [int]:
-    i:int = 3
-    while True:
-        yield i
-        while True:
-            i += 2
-            if is_prime(i):
-                break
-
-def is_prime(n:int) -> bool:
-    # Assume n >= 3
-    for i in range(2, ceil(sqrt(n)) + 1):
-        if n % i == 0:
-            return False
-    return True
