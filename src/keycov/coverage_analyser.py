@@ -4,12 +4,12 @@ from functools import reduce
 from re import match
 from typing import List, Set, Tuple
 
-def get_covering_sets(to_cover:Tuple[str, List[int]], sets:Set[Tuple[str, List[int]]]) -> List[Tuple[str, List[int]]]:
+def get_covering_sets(approximate_analysis:bool, to_cover:Tuple[str, List[int]], sets:Set[Tuple[str, List[int]]]) -> List[Tuple[str, List[int]]]:
     # Represent each layout as the product of the primes which represent its keys
     primed_to_cover = (to_cover[0], reduce(mult, to_cover[1], 1))
     primed_sets = list(map(lambda s: (s[0], 1, reduce(mult, s[1], 1)), sets))
 
-    # Set of tuples containing the remainder and set of currently chosen keysets (as a number)
+    # Set of: remainders and set of currently chosen keysets (as a number)
     seen:Set[Tuple[int, int]] = set()
     ##
     # @brief Perform a depth-first search on the set to cover,k
@@ -22,7 +22,7 @@ def get_covering_sets(to_cover:Tuple[str, List[int]], sets:Set[Tuple[str, List[i
     #
     # @return
     def primes_dfs(r:int, cp:int, csp:int, csns:[str], psets:List[Tuple[str, int, int]]) -> [[str]]:
-        seen.add((r, cp))
+        seen.add((r, cp) if not approximate_analysis else csp)
         if r == 1:
             return [csns]
         elif psets == []:
@@ -34,7 +34,9 @@ def get_covering_sets(to_cover:Tuple[str, List[int]], sets:Set[Tuple[str, List[i
             cp2:int = cp * p
             csp2:int = csp * kn
             # Explore beneficial unexplored children
-            if r != r2 and (r2, cp2) not in seen:
+            if r != r2 \
+                    and (not approximate_analysis or csp2 not in seen) \
+                    and (approximate_analysis or (r2, cp2) not in seen):
                 psets2:List[Tuple[str, int, int]] = copy(psets)
                 psets2.remove((n,p,kn))
                 child_covering_sets.extend(primes_dfs(r2, cp2, csp2, csns + [n], psets2))

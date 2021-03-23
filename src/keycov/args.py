@@ -133,6 +133,15 @@ args:[dict] = [
         'help': 'Set the colour theme for the text-output tables',
         'type': str,
         'default': ''
+    },
+    {
+        'dest': 'approximate_coverage_analysis',
+        'short': '-q',
+        'long': '--quick-coverage-analysis',
+        'action': 'store_true',
+        'help': 'Speed up coverage analysis by making some states indistinguishable. Does not affect checking for the existence of a covering set but other analysis is weakened to only bounds. See the README.',
+        'type': bool,
+        'default': False,
     }
 ]
 arg_dict:dict = { a['dest']: a for a in args if 'dest' in a }
