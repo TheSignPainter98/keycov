@@ -2,7 +2,7 @@ on:
   release:
     types:
       - created
-name: Generate distributables v8
+name: Generate distributables v9
 jobs:
   generate-artifacts:
     name: Generate artifacts
@@ -22,12 +22,12 @@ jobs:
         run: sudo apt-get install -y groff help2man python3-setuptools
       - name: Install pipreqs
         run: pip3 install pipreqs yq
-      - name: Generate requirements.txt
-        run: |
-          make requirements.txt
-          sed -i '/termcolor/d' requirements.txt
-      - name: Install requirements
-        run: pip3 install -r requirements.txt
+      # - name: Generate requirements.txt
+        # run: |
+          # make requirements.txt
+          # sed -i '/termcolor/d' requirements.txt
+      # - name: Install requirements
+        # run: pip3 install -r requirements.txt
       - name: Generate the artifacts
         run: |
           export PATH=$PATH:~/.local/bin
