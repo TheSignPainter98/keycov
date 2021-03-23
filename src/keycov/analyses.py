@@ -39,16 +39,34 @@ analyses:[dict] = [
         'description': 'Total number of kits analysed',
     },
     {
-        'name': 'most_common_kit_keys',
+        'name': '~most_common_kit_keys',
         'pretty-name': 'Most common keys in kits',
         'description': 'The keys which are the most common in the kits presented',
         'verbosity': 2
     },
     {
-        'name': 'most_common_keeb_keys',
+        'name': '~most_common_keeb_keys',
         'pretty-name': 'Most common keys in keyboards',
         'description': 'The keys which are the most common in the keyboards presented',
         'verbosity': 2
+    },
+    {
+        'name': 'most_common_kit_keys_format',
+        'pretty-name': 'Most common keys in kits',
+        'description': 'The keys which are the most common in the kits presented',
+        'verbosity': 2,
+        'requires': [
+            '~most_common_kit_keys'
+        ]
+    },
+    {
+        'name': 'most_common_keeb_keys_format',
+        'pretty-name': 'Most common keys in keyboards',
+        'description': 'The keys which are the most common in the keyboards presented',
+        'verbosity': 2,
+        'requires': [
+            '~most_common_keeb_keys'
+        ]
     },
     {
         'name': 'count_units',
@@ -250,11 +268,20 @@ def most_common_keeb_keys(pargs:Namespace, _1:dict, _2:[dict], input_layouts:[di
 
 def most_common_keys(layouts:[dict], output_cutoff:int) -> [str]:
     key_occurrences:dict = count_key_occurrences(layouts)
-    sorted_occurrences:[str] = list(map(lambda p: '%s (%s)' % p, sorted(key_occurrences.items(), key=swp)))
+    sorted_occurrences:[str] = list(sorted(key_occurrences.items(), key=swp))
 
     if output_cutoff > 0:
         return sorted_occurrences[:output_cutoff]
     return sorted_occurrences
+
+def most_common_kit_keys_format(_1:Namespace, results:dict, _2:[dict], _3:[dict]) -> [str]:
+    return format_key_occurrences(results['de_primer'], results['most_common_keeb_keys'])
+
+def most_common_keeb_keys_format(_1:Namespace, results:dict, _2:[dict], _3:[dict]) -> [str]:
+    return format_key_occurrences(results['de_primer'], results['most_common_kit_keys'])
+
+def format_key_occurrences(de_primer:dict, key_occurrences:[Tuple[int, str]]) -> [str]:
+    return list(map(lambda p: '%s (%d)' % (de_primer[p[0]]['pretty-name'], p[1]), key_occurrences))
 
 def count_key_occurrences(layouts:Tuple[str, List[dict]]) -> dict:
     occurrences:dict = {}
