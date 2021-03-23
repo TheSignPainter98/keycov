@@ -209,7 +209,7 @@ analyses:[dict] = [
     },
     {
         'name': 'all_keyboards_have_smallest_covering_kit_set_is_minimal_surplus_covering_kit_set',
-        'pretty-name': 'Optimal units per kit',
+        'pretty-name': 'All minimal-waste user kit-choices use fewest kits',
         'description': 'Whether for each keyboard, the set of kits which covers it with the least surplus units, is also the smallest set of kits which covers it. Note that this checks for a locally optimal solution and NOT whether the solution is globally optimal. Even if the analysis returns "true," more efficient kitting may still be possible but will require some re-arrangement.',
         'requires': [
             'smallest_covering_kit_set_is_minimal_surplus_covering_kit_set'
