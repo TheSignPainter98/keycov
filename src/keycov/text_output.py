@@ -7,7 +7,6 @@ from os.path import sep
 from re import match
 from shutil import get_terminal_size
 from sys import exit, platform, stderr, stdout
-from termcolor import ATTRIBUTES, colored as coloured, COLORS as COLOURS, HIGHLIGHTS
 from types import SimpleNamespace
 from typing import List, Union
 
@@ -117,6 +116,8 @@ def format_list(pargs:Namespace, known_paths:[str], l:list) -> str:
 def apply_formatting(pargs:Namespace, formatting:int, s:str) -> str:
     if not use_colour(pargs):
         return s
+
+    from termcolor import ATTRIBUTES, colored as coloured, COLORS as COLOURS, HIGHLIGHTS
 
     formatting_codes:str = ''
     formats_to_apply:[str]
