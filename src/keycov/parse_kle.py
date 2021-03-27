@@ -11,14 +11,16 @@ parser_initial_state:dict = {
     'w': 1.0,
     'h2': 1.0,
     'w2': 1.0,
+    'x2': 0.0,
+    'y2': 0.0,
     'l': False,
     'n': False,
     'c': default_cap_colour,
     't': default_text_colour,
 }
 parser_state_keys:[dict] = parser_initial_state.keys()
-parser_state_reset_keys:[str] = ['d', 'w', 'h', 'w2', 'h2', 'l', 'n']
-parser_state_output_keys:[str] = ['p', 'w', 'h', 'w2', 'h2', 'l', 'n', 'c', 't']
+parser_state_reset_keys:[str] = ['d', 'w', 'h', 'w2', 'h2', 'x2', 'y2', 'l', 'n']
+parser_state_output_keys:[str] = ['p', 'w', 'h', 'w2', 'h2', 'x2', 'y2', 'l', 'n', 'c', 't']
 
 def parse_kle(fname:str) -> [dict]:
     return parse_kle_raw(read_yaml(fname))
